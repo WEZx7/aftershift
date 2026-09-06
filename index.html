@@ -13,7 +13,6 @@
     <section id="start-screen" class="screen">
         <div class="boot-box">
             <p class="boot-label">NORTHSTAR SYSTEMS // INTERNAL ACCESS</p>
-
             <h1>AFTERSHIFT</h1>
 
             <p class="tagline">
@@ -24,12 +23,13 @@
                 <p>> IT Operations Console ........ READY</p>
                 <p>> Security Monitoring .......... READY</p>
                 <p>> Asset Database ............... READY</p>
+                <p>> Investigation Shell .......... READY</p>
                 <p>> Night Operator ................ CONNECTED</p>
             </div>
 
             <button id="start-button">START NIGHT SHIFT</button>
 
-            <p class="version">BUILD 0.1 // INTERNAL USE ONLY</p>
+            <p class="version">BUILD 0.2 // INTERNAL USE ONLY</p>
         </div>
     </section>
 
@@ -65,6 +65,16 @@
 
                 <button class="nav-button" data-view="employees">
                     Employees
+                </button>
+
+                <button class="nav-button terminal-nav" data-view="terminal">
+                    Terminal
+                    <span>NEW</span>
+                </button>
+
+                <button class="nav-button" data-view="evidence">
+                    Evidence
+                    <span id="evidence-count">0</span>
                 </button>
 
                 <div class="operator-card">
@@ -162,11 +172,16 @@
                             </div>
                         </div>
 
-                        <div id="evidence-box" class="evidence-box">
+                        <div class="evidence-box">
                             <p class="section-label">KNOWN EVIDENCE</p>
-                            <ul id="evidence-list">
-                                <li>User reports severe system slowdown</li>
-                            </ul>
+                            <ul id="ticket-evidence-list"></ul>
+                        </div>
+
+                        <div class="investigation-tip">
+                            <strong>INVESTIGATION TIP</strong>
+                            <span id="investigation-tip-text">
+                                Open Terminal to investigate beyond the information in this ticket.
+                            </span>
                         </div>
 
                         <p class="decision-label">SELECT RESPONSE</p>
@@ -191,42 +206,7 @@
                         <span class="live-dot">LIVE</span>
                     </div>
 
-                    <div class="network-grid">
-                        <div class="device-card online">
-                            <span class="device-dot"></span>
-                            <strong>CORE-SRV-01</strong>
-                            <p>Domain Controller</p>
-                            <small>ONLINE</small>
-                        </div>
-
-                        <div class="device-card online">
-                            <span class="device-dot"></span>
-                            <strong>FILE-SRV-02</strong>
-                            <p>File Server</p>
-                            <small>ONLINE</small>
-                        </div>
-
-                        <div class="device-card warning">
-                            <span class="device-dot"></span>
-                            <strong>FIN-LT-014</strong>
-                            <p>Finance Laptop</p>
-                            <small>WARNING</small>
-                        </div>
-
-                        <div class="device-card online">
-                            <span class="device-dot"></span>
-                            <strong>HR-LT-011</strong>
-                            <p>HR Laptop</p>
-                            <small>ONLINE</small>
-                        </div>
-
-                        <div class="device-card unknown">
-                            <span class="device-dot"></span>
-                            <strong>UNKNOWN-7F2</strong>
-                            <p>Unidentified Device</p>
-                            <small>UNVERIFIED</small>
-                        </div>
-                    </div>
+                    <div id="network-grid" class="network-grid"></div>
                 </section>
 
                 <section id="logs-view" class="view hidden">
@@ -274,6 +254,52 @@
                         </div>
                     </div>
                 </section>
+
+                <section id="terminal-view" class="view hidden">
+                    <div class="panel-heading">
+                        <div>
+                            <p class="section-label">NORTHSTAR SECURE SHELL</p>
+                            <h2>Investigation Terminal</h2>
+                        </div>
+
+                        <span class="terminal-status">SESSION ACTIVE</span>
+                    </div>
+
+                    <div class="terminal-window">
+                        <div id="terminal-output" class="terminal-output"></div>
+
+                        <div class="terminal-input-row">
+                            <span>aftershift&gt;</span>
+                            <input
+                                id="terminal-input"
+                                type="text"
+                                autocomplete="off"
+                                spellcheck="false"
+                                placeholder="type help"
+                            >
+                        </div>
+                    </div>
+                </section>
+
+                <section id="evidence-view" class="view hidden">
+                    <div class="panel-heading">
+                        <div>
+                            <p class="section-label">CASE FILE</p>
+                            <h2>Evidence Board</h2>
+                        </div>
+
+                        <span id="case-progress">0 / 8 DISCOVERED</span>
+                    </div>
+
+                    <div class="case-summary">
+                        <p>
+                            Several incidents may be connected. Discover evidence through tickets,
+                            logs, network data, and the investigation terminal.
+                        </p>
+                    </div>
+
+                    <div id="evidence-board" class="evidence-board"></div>
+                </section>
             </main>
         </div>
 
@@ -304,6 +330,11 @@
                     <span>Employee Trust</span>
                     <strong id="ending-trust"></strong>
                 </div>
+            </div>
+
+            <div class="ending-evidence">
+                <span>EVIDENCE DISCOVERED</span>
+                <strong id="ending-evidence-count"></strong>
             </div>
 
             <button onclick="location.reload()">START ANOTHER SHIFT</button>
