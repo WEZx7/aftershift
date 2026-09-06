@@ -1,0 +1,1949 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AFTERSHIFT // SHIFT 2</title>
+
+    <style>
+        :root {
+            --bg: #060a0b;
+            --panel: #0b1112;
+            --panel2: #101718;
+            --border: #263333;
+            --text: #d9dfdc;
+            --muted: #8b9691;
+            --green: #65efb1;
+            --blue: #6fd6ff;
+            --yellow: #e9bf64;
+            --red: #ff6b6b;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: var(--bg);
+            color: var(--text);
+            font-family: "Courier New", monospace;
+        }
+
+        button,
+        input {
+            font: inherit;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .scanlines {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 999;
+            opacity: 0.045;
+            background: repeating-linear-gradient(
+                to bottom,
+                transparent 0,
+                transparent 2px,
+                white 3px,
+                transparent 4px
+            );
+        }
+
+        #start-screen {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+            background:
+                radial-gradient(circle at center, #10201c 0%, #060a0b 58%);
+        }
+
+        .briefing {
+            width: min(760px, 100%);
+            border: 1px solid var(--border);
+            padding: 45px;
+            background: rgba(6, 10, 11, 0.95);
+        }
+
+        .label {
+            color: var(--green);
+            letter-spacing: 3px;
+            font-size: 11px;
+        }
+
+        .briefing h1 {
+            font-size: clamp(48px, 9vw, 86px);
+            margin: 12px 0 0;
+            letter-spacing: -4px;
+        }
+
+        .briefing h2 {
+            color: var(--muted);
+            font-weight: normal;
+            margin-top: 5px;
+        }
+
+        .case-box {
+            border-left: 2px solid var(--yellow);
+            padding: 18px 22px;
+            margin: 35px 0;
+            background: #0a1011;
+            line-height: 1.8;
+            color: #adb7b3;
+            font-size: 13px;
+        }
+
+        .case-box strong {
+            color: var(--yellow);
+        }
+
+        .warning {
+            color: var(--red);
+        }
+
+        .primary-button {
+            width: 100%;
+            border: 1px solid var(--green);
+            background: var(--green);
+            color: #04100c;
+            padding: 17px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .primary-button:hover {
+            background: transparent;
+            color: var(--green);
+        }
+
+        .version {
+            text-align: right;
+            font-size: 9px;
+            color: #46524e;
+            margin-top: 16px;
+        }
+
+        header {
+            height: 72px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 25px;
+            background: #080d0e;
+        }
+
+        .logo {
+            font-weight: bold;
+            font-size: 21px;
+            letter-spacing: 2px;
+        }
+
+        .logo small {
+            color: var(--muted);
+            font-size: 9px;
+            margin-left: 12px;
+        }
+
+        #clock {
+            font-size: 16px;
+        }
+
+        .game-layout {
+            display: grid;
+            grid-template-columns: 225px 1fr;
+            min-height: calc(100vh - 110px);
+        }
+
+        aside {
+            border-right: 1px solid var(--border);
+            padding: 25px 15px;
+            background: #080d0e;
+        }
+
+        .nav-label {
+            color: var(--green);
+            letter-spacing: 2px;
+            font-size: 10px;
+            margin: 0 10px 15px;
+        }
+
+        .nav {
+            width: 100%;
+            border: none;
+            border-left: 2px solid transparent;
+            background: transparent;
+            color: var(--muted);
+            padding: 13px 14px;
+            margin-bottom: 4px;
+            text-align: left;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .nav:hover {
+            color: var(--text);
+            background: var(--panel);
+        }
+
+        .nav.active {
+            color: var(--green);
+            border-left-color: var(--green);
+            background: var(--panel);
+        }
+
+        .nav span {
+            font-size: 9px;
+            border-radius: 20px;
+            background: #14201d;
+            padding: 2px 7px;
+        }
+
+        .operator {
+            border-top: 1px solid var(--border);
+            margin-top: 35px;
+            padding: 20px 10px;
+            font-size: 10px;
+            color: var(--muted);
+            line-height: 1.7;
+        }
+
+        .operator strong {
+            color: var(--text);
+        }
+
+        main {
+            padding: 24px;
+            overflow: auto;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .stat {
+            border: 1px solid var(--border);
+            padding: 17px;
+            background: var(--panel);
+        }
+
+        .stat span {
+            font-size: 9px;
+            color: var(--muted);
+            letter-spacing: 1px;
+        }
+
+        .stat strong {
+            display: block;
+            font-size: 26px;
+            margin: 8px 0;
+        }
+
+        .meter {
+            height: 4px;
+            background: #182222;
+        }
+
+        .meter div {
+            height: 100%;
+            background: var(--green);
+            transition: 0.4s;
+        }
+
+        .view {
+            border: 1px solid var(--border);
+            background: var(--panel);
+        }
+
+        .view-header {
+            padding: 20px 22px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .view-header p {
+            color: var(--green);
+            letter-spacing: 2px;
+            font-size: 10px;
+            margin: 0 0 7px;
+        }
+
+        .view-header h2 {
+            margin: 0;
+            font-size: 23px;
+        }
+
+        .badge {
+            font-size: 9px;
+            border: 1px solid var(--red);
+            color: var(--red);
+            padding: 6px 10px;
+        }
+
+        .alert-content {
+            padding: 25px;
+            max-width: 950px;
+        }
+
+        .alert-id {
+            display: flex;
+            justify-content: space-between;
+            color: var(--muted);
+            font-size: 10px;
+        }
+
+        .alert-content h3 {
+            font-size: 28px;
+            margin: 22px 0 12px;
+        }
+
+        blockquote {
+            margin: 0 0 25px;
+            border-left: 2px solid var(--yellow);
+            background: #101718;
+            padding: 16px;
+            color: #b3bfba;
+            line-height: 1.7;
+            font-size: 12px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            border: 1px solid var(--border);
+        }
+
+        .info-grid div {
+            padding: 15px;
+            border-right: 1px solid var(--border);
+        }
+
+        .info-grid div:last-child {
+            border: none;
+        }
+
+        .info-grid span {
+            color: var(--muted);
+            font-size: 8px;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .info-grid strong {
+            font-size: 11px;
+        }
+
+        .choices {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        .choice {
+            border: 1px solid var(--border);
+            background: #101718;
+            color: var(--text);
+            padding: 15px;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .choice:hover {
+            border-color: var(--green);
+            color: var(--green);
+        }
+
+        .result {
+            border: 1px solid var(--green);
+            margin-top: 20px;
+            padding: 18px;
+            line-height: 1.7;
+            color: #b7c4bf;
+        }
+
+        .result strong {
+            color: var(--green);
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .small-button {
+            margin-top: 12px;
+            border: 1px solid var(--green);
+            background: transparent;
+            color: var(--green);
+            padding: 10px 16px;
+            cursor: pointer;
+        }
+
+        .archive-list,
+        .chat-list,
+        .access-list {
+            padding: 20px;
+        }
+
+        .record,
+        .chat-message,
+        .access-record {
+            border: 1px solid var(--border);
+            padding: 17px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            background: #091011;
+        }
+
+        .record:hover,
+        .chat-message:hover,
+        .access-record:hover {
+            border-color: var(--green);
+        }
+
+        .record strong,
+        .chat-message strong,
+        .access-record strong {
+            display: block;
+            margin-bottom: 7px;
+        }
+
+        .record span,
+        .chat-message span,
+        .access-record span {
+            color: var(--muted);
+            font-size: 10px;
+            line-height: 1.7;
+        }
+
+        .suspicious {
+            border-color: rgba(255, 107, 107, 0.4);
+        }
+
+        .chat-body {
+            color: #b3bfba;
+            margin-top: 12px;
+            font-size: 12px;
+            line-height: 1.8;
+        }
+
+        .terminal {
+            min-height: 550px;
+            background: #040708;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        #terminal-output {
+            flex: 1;
+            max-height: 520px;
+            overflow-y: auto;
+        }
+
+        .terminal-line {
+            white-space: pre-wrap;
+            font-size: 12px;
+            line-height: 1.7;
+            color: #a6b3ae;
+            margin-bottom: 3px;
+        }
+
+        .terminal-line.green {
+            color: var(--green);
+        }
+
+        .terminal-line.blue {
+            color: var(--blue);
+        }
+
+        .terminal-line.yellow {
+            color: var(--yellow);
+        }
+
+        .terminal-line.red {
+            color: var(--red);
+        }
+
+        .terminal-line.command {
+            color: var(--text);
+        }
+
+        .terminal-input {
+            display: flex;
+            border-top: 1px solid var(--border);
+            margin-top: 15px;
+            padding-top: 15px;
+            color: var(--green);
+            gap: 10px;
+        }
+
+        .terminal-input input {
+            width: 100%;
+            border: none;
+            outline: none;
+            background: transparent;
+            color: var(--text);
+        }
+
+        .evidence-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            padding: 20px;
+        }
+
+        .evidence {
+            border: 1px solid var(--border);
+            padding: 18px;
+            min-height: 145px;
+        }
+
+        .evidence.locked {
+            opacity: 0.3;
+        }
+
+        .evidence.found {
+            border-color: rgba(101, 239, 177, 0.45);
+        }
+
+        .evidence .status {
+            color: var(--green);
+            font-size: 9px;
+            letter-spacing: 1px;
+        }
+
+        .evidence.locked .status {
+            color: var(--muted);
+        }
+
+        .evidence h3 {
+            margin: 12px 0 8px;
+            font-size: 17px;
+        }
+
+        .evidence p {
+            color: var(--muted);
+            font-size: 11px;
+            line-height: 1.7;
+            margin: 0;
+        }
+
+        .report {
+            padding: 25px;
+            max-width: 850px;
+        }
+
+        .report p {
+            color: var(--muted);
+            line-height: 1.8;
+        }
+
+        .report-options {
+            display: grid;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        .report-option {
+            border: 1px solid var(--border);
+            background: #0d1415;
+            color: var(--text);
+            padding: 17px;
+            cursor: pointer;
+            text-align: left;
+        }
+
+        .report-option:hover {
+            border-color: var(--green);
+        }
+
+        footer {
+            height: 38px;
+            border-top: 1px solid var(--border);
+            background: #080d0e;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            color: var(--muted);
+            font-size: 9px;
+        }
+
+        #ending-screen {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+        }
+
+        .ending {
+            width: min(720px, 100%);
+            border: 1px solid var(--border);
+            padding: 40px;
+        }
+
+        .ending h1 {
+            font-size: clamp(40px, 8vw, 65px);
+            margin: 22px 0;
+        }
+
+        .ending > p {
+            color: var(--muted);
+            line-height: 1.8;
+        }
+
+        .ending-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin: 30px 0;
+        }
+
+        .ending-stats div {
+            border: 1px solid var(--border);
+            padding: 14px;
+        }
+
+        .ending-stats span {
+            display: block;
+            color: var(--muted);
+            font-size: 8px;
+        }
+
+        .ending-stats strong {
+            display: block;
+            font-size: 22px;
+            margin-top: 7px;
+        }
+
+        @media (max-width: 850px) {
+            .game-layout {
+                grid-template-columns: 1fr;
+            }
+
+            aside {
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 4px;
+            }
+
+            .nav-label,
+            .operator {
+                display: none;
+            }
+
+            .stats {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .evidence-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 550px) {
+            main {
+                padding: 12px;
+            }
+
+            header {
+                padding: 0 12px;
+            }
+
+            .logo small {
+                display: none;
+            }
+
+            aside {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .stats {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .choices,
+            .evidence-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .info-grid div {
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+            }
+
+            .briefing {
+                padding: 27px;
+            }
+
+            .ending-stats {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="scanlines"></div>
+
+    <section id="start-screen">
+        <div class="briefing">
+            <p class="label">NORTHSTAR SYSTEMS // NIGHT OPERATIONS</p>
+
+            <h1>AFTERSHIFT</h1>
+            <h2>SHIFT 2 // THE GHOST ACCOUNT</h2>
+
+            <div class="case-box">
+                <strong>PREVIOUS INCIDENT:</strong><br>
+                UNKNOWN-7F2 was successfully isolated at 01:17 AM.<br>
+                The attack chain was reconstructed and preserved.<br><br>
+
+                <span class="warning">
+                    PHYSICAL RECOVERY STATUS: FAILED
+                </span><br><br>
+
+                Morning technicians could not locate any physical device
+                corresponding to UNKNOWN-7F2.
+            </div>
+
+            <div class="case-box">
+                <strong>02:03 AM // NEW ALERT</strong><br><br>
+
+                Badge <strong>EW-044</strong> accessed Server Room B.<br>
+                Assigned employee: Elias Ward.<br><br>
+
+                Employment status:
+                <span class="warning">TERMINATED 94 DAYS AGO.</span>
+            </div>
+
+            <button id="start-button" class="primary-button">
+                BEGIN SHIFT 2
+            </button>
+
+            <p class="version">BUILD 0.4 // CAMPAIGN CHAPTER 02</p>
+        </div>
+    </section>
+
+    <section id="game-screen" class="hidden">
+        <header>
+            <div class="logo">
+                AFTERSHIFT
+                <small>SHIFT 2 // NORTHSTAR OPERATIONS</small>
+            </div>
+
+            <div id="clock">02:03 AM</div>
+        </header>
+
+        <div class="game-layout">
+            <aside>
+                <p class="nav-label">WORKSTATION</p>
+
+                <button class="nav active" data-view="alerts">
+                    Alerts
+                    <span id="alert-count">3</span>
+                </button>
+
+                <button class="nav" data-view="archive">
+                    Archive
+                </button>
+
+                <button class="nav" data-view="chat">
+                    Internal Chat
+                    <span>1</span>
+                </button>
+
+                <button class="nav" data-view="access">
+                    Access Logs
+                </button>
+
+                <button class="nav" data-view="terminal">
+                    Terminal
+                </button>
+
+                <button class="nav" data-view="evidence">
+                    Evidence
+                    <span id="evidence-count">0</span>
+                </button>
+
+                <button id="report-nav" class="nav hidden" data-view="report">
+                    Final Report
+                    <span>!</span>
+                </button>
+
+                <div class="operator">
+                    OPERATOR<br>
+                    <strong>Night IT Technician</strong><br>
+                    Clearance: Level 2<br><br>
+
+                    Previous Case:<br>
+                    FULL ATTRIBUTION
+                </div>
+            </aside>
+
+            <main>
+                <section class="stats">
+                    <div class="stat">
+                        <span>SYSTEM HEALTH</span>
+                        <strong id="health-value">100%</strong>
+                        <div class="meter">
+                            <div id="health-bar"></div>
+                        </div>
+                    </div>
+
+                    <div class="stat">
+                        <span>SECURITY</span>
+                        <strong id="security-value">100%</strong>
+                        <div class="meter">
+                            <div id="security-bar"></div>
+                        </div>
+                    </div>
+
+                    <div class="stat">
+                        <span>INTERNAL TRUST</span>
+                        <strong id="trust-value">75%</strong>
+                        <div class="meter">
+                            <div id="trust-bar"></div>
+                        </div>
+                    </div>
+
+                    <div class="stat">
+                        <span>EVIDENCE</span>
+                        <strong id="evidence-stat">0 / 8</strong>
+                    </div>
+                </section>
+
+                <section id="alerts-view" class="view">
+                    <div class="view-header">
+                        <div>
+                            <p>SECURITY OPERATIONS</p>
+                            <h2>Active Alert</h2>
+                        </div>
+
+                        <span class="badge">HIGH PRIORITY</span>
+                    </div>
+
+                    <div class="alert-content">
+                        <div class="alert-id">
+                            <span id="alert-id"></span>
+                            <span id="alert-time"></span>
+                        </div>
+
+                        <h3 id="alert-title"></h3>
+
+                        <blockquote id="alert-message"></blockquote>
+
+                        <div class="info-grid">
+                            <div>
+                                <span>SOURCE</span>
+                                <strong id="alert-source"></strong>
+                            </div>
+
+                            <div>
+                                <span>IDENTIFIER</span>
+                                <strong id="alert-identifier"></strong>
+                            </div>
+
+                            <div>
+                                <span>LOCATION</span>
+                                <strong id="alert-location"></strong>
+                            </div>
+
+                            <div>
+                                <span>STATUS</span>
+                                <strong id="alert-status"></strong>
+                            </div>
+                        </div>
+
+                        <div id="choices" class="choices"></div>
+
+                        <div id="result" class="result hidden">
+                            <strong>ACTION RESULT</strong>
+                            <span id="result-text"></span><br>
+                            <button id="continue-button" class="small-button">
+                                CONTINUE
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="archive-view" class="view hidden">
+                    <div class="view-header">
+                        <div>
+                            <p>CASE DATABASE</p>
+                            <h2>Incident Archive</h2>
+                        </div>
+                    </div>
+
+                    <div class="archive-list">
+                        <div class="record suspicious" id="archive-ns031">
+                            <strong>NS-031 // Unauthorized Endpoint</strong>
+                            <span>
+                                Closed 94 days ago.<br>
+                                Device identifier was never physically recovered.<br>
+                                Click to inspect archived case.
+                            </span>
+                        </div>
+
+                        <div class="record">
+                            <strong>NS-024 // VPN Configuration Error</strong>
+                            <span>Closed 121 days ago. No security impact.</span>
+                        </div>
+
+                        <div class="record">
+                            <strong>NS-018 // File Server Degradation</strong>
+                            <span>Closed 167 days ago. Hardware failure.</span>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="chat-view" class="view hidden">
+                    <div class="view-header">
+                        <div>
+                            <p>INTERNAL MESSAGING</p>
+                            <h2>Security Chat</h2>
+                        </div>
+                    </div>
+
+                    <div class="chat-list">
+                        <div class="chat-message suspicious" id="security-chat">
+                            <strong>Lena Park // Morning Security</strong>
+
+                            <span>07:42 AM</span>
+
+                            <div class="chat-body">
+                                About last night's report... we never recovered
+                                UNKNOWN-7F2 physically.<br><br>
+
+                                Keep that detail out of the executive summary
+                                until we know what we're dealing with.<br><br>
+
+                                Also, don't reopen NS-031.
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="access-view" class="view hidden">
+                    <div class="view-header">
+                        <div>
+                            <p>PHYSICAL SECURITY</p>
+                            <h2>Access Logs</h2>
+                        </div>
+                    </div>
+
+                    <div class="access-list">
+                        <div class="access-record suspicious" id="badge-record">
+                            <strong>02:03 // SERVER ROOM B</strong>
+                            <span>
+                                Badge: EW-044<br>
+                                Employee: Elias Ward<br>
+                                Employment Status: TERMINATED<br>
+                                Access Result: GRANTED
+                            </span>
+                        </div>
+
+                        <div class="access-record">
+                            <strong>01:48 // MAIN OFFICE</strong>
+                            <span>Badge: RP-108 // Access granted.</span>
+                        </div>
+
+                        <div class="access-record">
+                            <strong>01:14 // DATACENTER HALL</strong>
+                            <span>Maintenance staff // Access granted.</span>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="terminal-view" class="view hidden">
+                    <div class="view-header">
+                        <div>
+                            <p>NORTHSTAR SECURE SHELL</p>
+                            <h2>Investigation Terminal</h2>
+                        </div>
+                    </div>
+
+                    <div class="terminal">
+                        <div id="terminal-output"></div>
+
+                        <div class="terminal-input">
+                            <span>aftershift&gt;</span>
+                            <input
+                                id="terminal-input"
+                                autocomplete="off"
+                                spellcheck="false"
+                                placeholder="type help"
+                            >
+                        </div>
+                    </div>
+                </section>
+
+                <section id="evidence-view" class="view hidden">
+                    <div class="view-header">
+                        <div>
+                            <p>CASE 02</p>
+                            <h2>Evidence Board</h2>
+                        </div>
+
+                        <span id="case-progress">0 / 8</span>
+                    </div>
+
+                    <div id="evidence-grid" class="evidence-grid"></div>
+                </section>
+
+                <section id="report-view" class="view hidden">
+                    <div class="view-header">
+                        <div>
+                            <p>INCIDENT RESPONSE</p>
+                            <h2>Final Report</h2>
+                        </div>
+                    </div>
+
+                    <div class="report">
+                        <p>
+                            The shift is nearly over. Choose how this incident
+                            should be documented and escalated.
+                        </p>
+
+                        <p id="report-summary"></p>
+
+                        <div class="report-options">
+                            <button class="report-option" data-report="director">
+                                <strong>ESCALATE TO SECURITY DIRECTOR</strong><br><br>
+                                Preserve all evidence and bypass the suppressed
+                                morning report.
+                            </button>
+
+                            <button class="report-option" data-report="security">
+                                <strong>HAND CASE TO MORNING SECURITY</strong><br><br>
+                                Follow the standard internal escalation process.
+                            </button>
+
+                            <button class="report-option" data-report="close">
+                                <strong>CLOSE AS RECURRING ASSET ERROR</strong><br><br>
+                                Avoid operational disruption and close the incident.
+                            </button>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+
+        <footer>
+            <span>NORTHSTAR SYSTEMS // INTERNAL NETWORK</span>
+            <span id="footer-status">Shift 2 active.</span>
+        </footer>
+    </section>
+
+    <section id="ending-screen" class="hidden">
+        <div class="ending">
+            <p class="label">SHIFT 2 COMPLETE</p>
+
+            <h1 id="ending-title"></h1>
+
+            <p id="ending-description"></p>
+
+            <div class="ending-stats">
+                <div>
+                    <span>SYSTEM HEALTH</span>
+                    <strong id="ending-health"></strong>
+                </div>
+
+                <div>
+                    <span>SECURITY</span>
+                    <strong id="ending-security"></strong>
+                </div>
+
+                <div>
+                    <span>INTERNAL TRUST</span>
+                    <strong id="ending-trust"></strong>
+                </div>
+
+                <div>
+                    <span>EVIDENCE</span>
+                    <strong id="ending-evidence"></strong>
+                </div>
+            </div>
+
+            <button class="primary-button" onclick="location.reload()">
+                REPLAY SHIFT 2
+            </button>
+        </div>
+    </section>
+
+    <script>
+        const state = {
+            health: 100,
+            security: 100,
+            trust: 75,
+            alertIndex: 0,
+            minutes: 2 * 60 + 3,
+            ghostIsolated: false,
+            reportChoice: null
+        };
+
+        const foundEvidence = new Set();
+
+        const evidence = {
+            terminatedBadge: {
+                title: "Terminated Employee Badge",
+                description: "Badge EW-044 successfully entered Server Room B despite belonging to Elias Ward, who was terminated 94 days ago."
+            },
+
+            ghostAccount: {
+                title: "Reactivated Ghost Account",
+                description: "The disabled account e.ward was silently re-enabled by an administrative service token at 01:52 AM."
+            },
+
+            cameraGap: {
+                title: "Camera Time Gap",
+                description: "Server Room B camera footage contains a precise 11-minute recording gap around the badge access event."
+            },
+
+            reusedMac: {
+                title: "Reused Device Identity",
+                description: "GHOST-03 uses the same hardware address previously associated with archived case NS-031."
+            },
+
+            archivedIncident: {
+                title: "Archived Incident NS-031",
+                description: "A nearly identical unauthorized endpoint appeared 94 days earlier and was also never physically recovered."
+            },
+
+            suppressedRecovery: {
+                title: "Suppressed Recovery Failure",
+                description: "Morning Security intentionally omitted the fact that UNKNOWN-7F2 was never physically located."
+            },
+
+            adminToken: {
+                title: "Internal Administrative Token",
+                description: "Service token svc-deploy-07 reactivated Elias Ward's account and bypassed normal identity controls."
+            },
+
+            insiderLink: {
+                title: "Internal Access Correlation",
+                description: "The combined evidence indicates the recurring unauthorized devices depend on valid internal credentials and administrative access."
+            }
+        };
+
+        const alerts = [
+            {
+                id: "PHY-204",
+                time: "02:03 AM",
+                title: "Terminated employee badge used",
+                message: "\"Physical access control accepted credentials assigned to a former employee.\"",
+                source: "Access Control",
+                identifier: "EW-044",
+                location: "Server Room B",
+                status: "GRANTED",
+
+                choices: [
+                    {
+                        text: "Lock badge immediately",
+                        result: "EW-044 is disabled. No additional badge activity is detected.",
+                        health: 0,
+                        security: 8,
+                        trust: -2,
+                        evidence: "terminatedBadge"
+                    },
+
+                    {
+                        text: "Investigate badge ownership",
+                        result: "Directory records confirm Elias Ward was terminated 94 days ago.",
+                        health: 0,
+                        security: 5,
+                        trust: 1,
+                        evidence: "terminatedBadge"
+                    },
+
+                    {
+                        text: "Ignore as access sync delay",
+                        result: "The badge remains active despite the employee's terminated status.",
+                        health: -3,
+                        security: -12,
+                        trust: 2
+                    }
+                ]
+            },
+
+            {
+                id: "CAM-771",
+                time: "02:11 AM",
+                title: "Security camera recording gap",
+                message: "\"Server Room B camera feed contains missing footage during the physical access event.\"",
+                source: "Video Monitoring",
+                identifier: "CAM-SRB-02",
+                location: "Server Room B",
+                status: "11 MIN GAP",
+
+                choices: [
+                    {
+                        text: "Analyze recording timestamps",
+                        result: "The footage gap begins 37 seconds before EW-044 entered the room and ends shortly after.",
+                        health: 0,
+                        security: 6,
+                        trust: 1,
+                        evidence: "cameraGap"
+                    },
+
+                    {
+                        text: "Restart camera service",
+                        result: "The camera is operational again, but the missing footage cannot be recovered.",
+                        health: 4,
+                        security: -4,
+                        trust: 0
+                    },
+
+                    {
+                        text: "Escalate physical security",
+                        result: "Physical security is notified and access to Server Room B is temporarily restricted.",
+                        health: -2,
+                        security: 9,
+                        trust: -5,
+                        evidence: "cameraGap"
+                    }
+                ]
+            },
+
+            {
+                id: "NET-882",
+                time: "02:26 AM",
+                title: "Archived device identity returned",
+                message: "\"Network monitoring detected a hardware identifier associated with a closed incident.\"",
+                source: "Network Monitor",
+                identifier: "GHOST-03",
+                location: "Core VLAN",
+                status: "CONNECTED",
+
+                choices: [
+                    {
+                        text: "Compare archived network records",
+                        result: "The device hardware address matches the endpoint recorded in case NS-031.",
+                        health: 0,
+                        security: 8,
+                        trust: 1,
+                        evidence: "reusedMac"
+                    },
+
+                    {
+                        text: "Isolate GHOST-03",
+                        result: "GHOST-03 is removed from the network and its traffic is preserved.",
+                        health: -1,
+                        security: 12,
+                        trust: 0,
+                        isolate: true
+                    },
+
+                    {
+                        text: "Monitor silently",
+                        result: "GHOST-03 begins authenticating to internal management services.",
+                        health: -5,
+                        security: -8,
+                        trust: 0
+                    }
+                ]
+            }
+        ];
+
+        const startButton = document.getElementById("start-button");
+        const startScreen = document.getElementById("start-screen");
+        const gameScreen = document.getElementById("game-screen");
+        const endingScreen = document.getElementById("ending-screen");
+
+        const terminalInput = document.getElementById("terminal-input");
+        const terminalOutput = document.getElementById("terminal-output");
+
+        startButton.addEventListener("click", startGame);
+
+        document.querySelectorAll(".nav").forEach(button => {
+            button.addEventListener("click", () => {
+                openView(button.dataset.view);
+
+                if (button.dataset.view === "terminal") {
+                    setTimeout(() => terminalInput.focus(), 100);
+                }
+            });
+        });
+
+        terminalInput.addEventListener("keydown", event => {
+            if (event.key === "Enter") {
+                const command = terminalInput.value.trim();
+
+                if (command) {
+                    runCommand(command);
+                }
+
+                terminalInput.value = "";
+            }
+        });
+
+        document.getElementById("continue-button").addEventListener("click", nextAlert);
+
+        document.getElementById("archive-ns031").addEventListener("click", () => {
+            discover("archivedIncident");
+
+            alert(
+                "NS-031 ARCHIVE\n\n" +
+                "Unauthorized endpoint appeared 94 days ago.\n" +
+                "MAC: 8C:7A:15:3F:91:C2\n" +
+                "Assigned user: NONE\n" +
+                "Physical recovery: FAILED\n\n" +
+                "Case closed by Morning Security."
+            );
+        });
+
+        document.getElementById("security-chat").addEventListener("click", () => {
+            discover("suppressedRecovery");
+        });
+
+        document.getElementById("badge-record").addEventListener("click", () => {
+            discover("terminatedBadge");
+        });
+
+        document.querySelectorAll(".report-option").forEach(button => {
+            button.addEventListener("click", () => {
+                state.reportChoice = button.dataset.report;
+                finishShift();
+            });
+        });
+
+        function startGame() {
+            startScreen.classList.add("hidden");
+            gameScreen.classList.remove("hidden");
+
+            terminalLine("NORTHSTAR SECURE SHELL // SHIFT 2", "green");
+            terminalLine("Case continuity module loaded.", "blue");
+            terminalLine("Previous Incident: UNKNOWN-7F2");
+            terminalLine("Physical Recovery: FAILED", "red");
+            terminalLine("");
+            terminalLine('Type "help" for investigation commands.');
+
+            renderEvidence();
+            renderAlert();
+            updateStats();
+            updateClock();
+        }
+
+        function renderAlert() {
+            const alertData = alerts[state.alertIndex];
+
+            document.getElementById("alert-id").textContent = alertData.id;
+            document.getElementById("alert-time").textContent = alertData.time;
+            document.getElementById("alert-title").textContent = alertData.title;
+            document.getElementById("alert-message").textContent = alertData.message;
+            document.getElementById("alert-source").textContent = alertData.source;
+            document.getElementById("alert-identifier").textContent = alertData.identifier;
+            document.getElementById("alert-location").textContent = alertData.location;
+            document.getElementById("alert-status").textContent = alertData.status;
+
+            const choices = document.getElementById("choices");
+            choices.innerHTML = "";
+
+            alertData.choices.forEach(choice => {
+                const button = document.createElement("button");
+                button.className = "choice";
+                button.textContent = choice.text;
+
+                button.addEventListener("click", () => chooseAction(choice));
+
+                choices.appendChild(button);
+            });
+
+            document.getElementById("result").classList.add("hidden");
+
+            document.getElementById("alert-count").textContent =
+                alerts.length - state.alertIndex;
+        }
+
+        function chooseAction(choice) {
+            state.health = clamp(state.health + choice.health);
+            state.security = clamp(state.security + choice.security);
+            state.trust = clamp(state.trust + choice.trust);
+
+            if (choice.evidence) {
+                discover(choice.evidence);
+            }
+
+            if (choice.isolate) {
+                state.ghostIsolated = true;
+            }
+
+            state.minutes += 9;
+
+            updateStats();
+            updateClock();
+
+            document.getElementById("choices").innerHTML = "";
+
+            document.getElementById("result-text").textContent = choice.result;
+            document.getElementById("result").classList.remove("hidden");
+        }
+
+        function nextAlert() {
+            state.alertIndex++;
+
+            if (state.alertIndex >= alerts.length) {
+                unlockReport();
+                return;
+            }
+
+            state.minutes += 5;
+
+            updateClock();
+            renderAlert();
+        }
+
+        function unlockReport() {
+            document.getElementById("report-nav").classList.remove("hidden");
+
+            document.getElementById("report-summary").textContent =
+                `${foundEvidence.size} of 8 evidence items have been identified. ` +
+                `GHOST-03 is ${state.ghostIsolated ? "isolated" : "still active or unresolved"}.`;
+
+            openView("report");
+
+            document.getElementById("footer-status").textContent =
+                "Final report required before shift completion.";
+        }
+
+        function openView(name) {
+            document.querySelectorAll(".view").forEach(view => {
+                view.classList.add("hidden");
+            });
+
+            const target = document.getElementById(`${name}-view`);
+
+            if (target) {
+                target.classList.remove("hidden");
+            }
+
+            document.querySelectorAll(".nav").forEach(button => {
+                button.classList.toggle("active", button.dataset.view === name);
+            });
+        }
+
+        function discover(key) {
+            if (!evidence[key] || foundEvidence.has(key)) {
+                return;
+            }
+
+            foundEvidence.add(key);
+
+            terminalLine(`[EVIDENCE ADDED] ${evidence[key].title}`, "green");
+
+            document.getElementById("footer-status").textContent =
+                `New evidence: ${evidence[key].title}`;
+
+            checkInsiderCorrelation();
+            renderEvidence();
+            updateStats();
+        }
+
+        function checkInsiderCorrelation() {
+            const required = [
+                "terminatedBadge",
+                "ghostAccount",
+                "cameraGap",
+                "reusedMac",
+                "archivedIncident",
+                "suppressedRecovery",
+                "adminToken"
+            ];
+
+            if (
+                required.every(item => foundEvidence.has(item)) &&
+                !foundEvidence.has("insiderLink")
+            ) {
+                foundEvidence.add("insiderLink");
+
+                terminalLine(
+                    "[CORRELATION COMPLETE] Internal Access Correlation discovered.",
+                    "green"
+                );
+            }
+        }
+
+        function renderEvidence() {
+            const grid = document.getElementById("evidence-grid");
+            grid.innerHTML = "";
+
+            Object.entries(evidence).forEach(([key, item], index) => {
+                const found = foundEvidence.has(key);
+
+                const card = document.createElement("div");
+                card.className = `evidence ${found ? "found" : "locked"}`;
+
+                card.innerHTML = `
+                    <span class="status">
+                        ${found ? "DISCOVERED" : "UNDISCOVERED"}
+                    </span>
+
+                    <h3>
+                        ${found
+                            ? item.title
+                            : `Evidence ${String(index + 1).padStart(2, "0")}`}
+                    </h3>
+
+                    <p>
+                        ${found
+                            ? item.description
+                            : "Further investigation required."}
+                    </p>
+                `;
+
+                grid.appendChild(card);
+            });
+
+            document.getElementById("evidence-count").textContent =
+                foundEvidence.size;
+
+            document.getElementById("case-progress").textContent =
+                `${foundEvidence.size} / 8`;
+
+            document.getElementById("evidence-stat").textContent =
+                `${foundEvidence.size} / 8`;
+        }
+
+        function runCommand(raw) {
+            terminalLine(`aftershift> ${raw}`, "command");
+
+            const input = raw.trim();
+            const lower = input.toLowerCase();
+            const parts = input.split(/\s+/);
+            const command = parts[0].toLowerCase();
+            const argument = parts.slice(1).join(" ");
+
+            state.minutes += 2;
+            updateClock();
+
+            if (lower === "help") {
+                showHelp();
+                return;
+            }
+
+            if (lower === "clear") {
+                terminalOutput.innerHTML = "";
+                return;
+            }
+
+            if (lower === "status") {
+                terminalLine("SHIFT 2 STATUS", "blue");
+                terminalLine(`System Health: ${state.health}%`);
+                terminalLine(`Security: ${state.security}%`);
+                terminalLine(`Internal Trust: ${state.trust}%`);
+                terminalLine(`Evidence: ${foundEvidence.size}/8`);
+                terminalLine(
+                    `GHOST-03: ${state.ghostIsolated ? "ISOLATED" : "UNRESOLVED"}`,
+                    state.ghostIsolated ? "green" : "red"
+                );
+                return;
+            }
+
+            if (lower === "evidence") {
+                terminalLine("DISCOVERED EVIDENCE", "blue");
+
+                if (!foundEvidence.size) {
+                    terminalLine("No evidence discovered.", "yellow");
+                } else {
+                    foundEvidence.forEach(key => {
+                        terminalLine(`- ${evidence[key].title}`);
+                    });
+                }
+
+                return;
+            }
+
+            if (command === "badge") {
+                badgeCommand(argument);
+                return;
+            }
+
+            if (command === "account") {
+                accountCommand(argument);
+                return;
+            }
+
+            if (command === "camera") {
+                cameraCommand(argument);
+                return;
+            }
+
+            if (command === "mac") {
+                macCommand(argument);
+                return;
+            }
+
+            if (command === "archive") {
+                archiveCommand(argument);
+                return;
+            }
+
+            if (command === "token") {
+                tokenCommand(argument);
+                return;
+            }
+
+            if (command === "connections") {
+                connectionCommand(argument);
+                return;
+            }
+
+            if (command === "isolate") {
+                isolateCommand(argument);
+                return;
+            }
+
+            if (command === "chat") {
+                chatCommand(argument);
+                return;
+            }
+
+            terminalLine("Unknown command. Type help.", "red");
+        }
+
+        function showHelp() {
+            terminalLine("SHIFT 2 INVESTIGATION COMMANDS", "green");
+            terminalLine("");
+            terminalLine("badge EW-044");
+            terminalLine("account e.ward");
+            terminalLine("camera server-room");
+            terminalLine("mac 8C:7A:15:3F:91:C2");
+            terminalLine("archive NS-031");
+            terminalLine("token svc-deploy-07");
+            terminalLine("connections GHOST-03");
+            terminalLine("isolate GHOST-03");
+            terminalLine("chat lena");
+            terminalLine("evidence");
+            terminalLine("status");
+            terminalLine("clear");
+        }
+
+        function badgeCommand(argument) {
+            if (argument.toUpperCase() !== "EW-044") {
+                terminalLine("Badge record not found.", "red");
+                return;
+            }
+
+            terminalLine("BADGE RECORD", "blue");
+            terminalLine("Badge: EW-044");
+            terminalLine("Employee: Elias Ward");
+            terminalLine("Employment: TERMINATED 94 DAYS AGO", "red");
+            terminalLine("Badge Status: ACTIVE", "yellow");
+            terminalLine("Last Access: Server Room B // 02:03");
+
+            discover("terminatedBadge");
+        }
+
+        function accountCommand(argument) {
+            if (argument.toLowerCase() !== "e.ward") {
+                terminalLine("Account not found.", "red");
+                return;
+            }
+
+            terminalLine("DIRECTORY ACCOUNT", "blue");
+            terminalLine("Username: e.ward");
+            terminalLine("Owner: Elias Ward");
+            terminalLine("Employment: TERMINATED", "red");
+            terminalLine("Account Disabled: 94 days ago");
+            terminalLine("Account Reactivated: 01:52 AM", "yellow");
+            terminalLine("Reactivation Source: svc-deploy-07");
+
+            discover("ghostAccount");
+        }
+
+        function cameraCommand(argument) {
+            if (argument.toLowerCase() !== "server-room") {
+                terminalLine("Usage: camera server-room", "yellow");
+                return;
+            }
+
+            terminalLine("CAMERA LOG // SERVER ROOM B", "blue");
+            terminalLine("01:58:23 Recording normal");
+            terminalLine("02:02:21 SIGNAL LOST", "red");
+            terminalLine("02:03:00 Badge EW-044 granted access", "yellow");
+            terminalLine("02:13:32 SIGNAL RESTORED");
+            terminalLine("Gap duration: 11m 11s");
+
+            discover("cameraGap");
+        }
+
+        function macCommand(argument) {
+            if (argument.toUpperCase() !== "8C:7A:15:3F:91:C2") {
+                terminalLine("Hardware address not found.", "red");
+                return;
+            }
+
+            terminalLine("MAC HISTORY", "blue");
+            terminalLine("8C:7A:15:3F:91:C2");
+            terminalLine("");
+            terminalLine("Current: GHOST-03");
+            terminalLine("Previous Match: NS-031", "yellow");
+            terminalLine("Previous Detection: 94 days ago");
+
+            discover("reusedMac");
+        }
+
+        function archiveCommand(argument) {
+            if (argument.toUpperCase() !== "NS-031") {
+                terminalLine("Archive record not found.", "red");
+                return;
+            }
+
+            terminalLine("ARCHIVED CASE NS-031", "blue");
+            terminalLine("Classification: Unauthorized Endpoint");
+            terminalLine("MAC: 8C:7A:15:3F:91:C2");
+            terminalLine("Owner: NONE");
+            terminalLine("Physical Recovery: FAILED", "red");
+            terminalLine("Closed By: Morning Security");
+            terminalLine("Age: 94 days");
+
+            discover("archivedIncident");
+        }
+
+        function tokenCommand(argument) {
+            if (argument.toLowerCase() !== "svc-deploy-07") {
+                terminalLine("Service token not found.", "red");
+                return;
+            }
+
+            terminalLine("SERVICE TOKEN TRACE", "blue");
+            terminalLine("Token: svc-deploy-07");
+            terminalLine("Privilege: DIRECTORY ADMIN", "red");
+            terminalLine("Used: 01:52 AM");
+            terminalLine("Action: Reactivated e.ward");
+            terminalLine("Interactive User: NONE");
+            terminalLine("Approval Record: NOT FOUND", "red");
+
+            discover("adminToken");
+        }
+
+        function connectionCommand(argument) {
+            if (argument.toUpperCase() !== "GHOST-03") {
+                terminalLine("Usage: connections GHOST-03", "yellow");
+                return;
+            }
+
+            terminalLine("GHOST-03 CONNECTIONS", "blue");
+            terminalLine("GHOST-03 -> CORE-SRV-01");
+            terminalLine("GHOST-03 -> AUTH-SVC");
+            terminalLine("GHOST-03 -> DEPLOYMENT-SVC");
+            terminalLine("GHOST-03 -> 10.40.7.19");
+            terminalLine("");
+            terminalLine("Device uses valid internal service routes.", "yellow");
+        }
+
+        function isolateCommand(argument) {
+            if (argument.toUpperCase() !== "GHOST-03") {
+                terminalLine("Usage: isolate GHOST-03", "yellow");
+                return;
+            }
+
+            if (state.ghostIsolated) {
+                terminalLine("GHOST-03 already isolated.", "yellow");
+                return;
+            }
+
+            state.ghostIsolated = true;
+            state.security = clamp(state.security + 10);
+
+            terminalLine("NETWORK CONTROL", "blue");
+            terminalLine("GHOST-03 -> ISOLATED", "green");
+            terminalLine("Traffic blocked.");
+            terminalLine("Connection state preserved.");
+
+            updateStats();
+        }
+
+        function chatCommand(argument) {
+            if (argument.toLowerCase() !== "lena") {
+                terminalLine("Usage: chat lena", "yellow");
+                return;
+            }
+
+            terminalLine("INTERNAL MESSAGE // LENA PARK", "blue");
+            terminalLine(
+                "\"We never recovered UNKNOWN-7F2 physically. " +
+                "Keep it out of the executive summary.\"",
+                "yellow"
+            );
+            terminalLine(
+                "\"And don't reopen NS-031.\"",
+                "red"
+            );
+
+            discover("suppressedRecovery");
+        }
+
+        function terminalLine(text, type = "") {
+            const line = document.createElement("div");
+            line.className = `terminal-line ${type}`;
+            line.textContent = text;
+
+            terminalOutput.appendChild(line);
+            terminalOutput.scrollTop = terminalOutput.scrollHeight;
+        }
+
+        function updateStats() {
+            document.getElementById("health-value").textContent =
+                `${state.health}%`;
+
+            document.getElementById("security-value").textContent =
+                `${state.security}%`;
+
+            document.getElementById("trust-value").textContent =
+                `${state.trust}%`;
+
+            document.getElementById("health-bar").style.width =
+                `${state.health}%`;
+
+            document.getElementById("security-bar").style.width =
+                `${state.security}%`;
+
+            document.getElementById("trust-bar").style.width =
+                `${state.trust}%`;
+
+            setBarColor("health-bar", state.health);
+            setBarColor("security-bar", state.security);
+            setBarColor("trust-bar", state.trust);
+
+            document.getElementById("evidence-stat").textContent =
+                `${foundEvidence.size} / 8`;
+        }
+
+        function setBarColor(id, value) {
+            const bar = document.getElementById(id);
+
+            if (value >= 70) {
+                bar.style.background = "var(--green)";
+            } else if (value >= 40) {
+                bar.style.background = "var(--yellow)";
+            } else {
+                bar.style.background = "var(--red)";
+            }
+        }
+
+        function updateClock() {
+            state.minutes %= 1440;
+
+            const hours = Math.floor(state.minutes / 60);
+            const minutes = state.minutes % 60;
+
+            const period = hours >= 12 ? "PM" : "AM";
+
+            let displayHour = hours % 12;
+
+            if (displayHour === 0) {
+                displayHour = 12;
+            }
+
+            document.getElementById("clock").textContent =
+                `${displayHour}:${String(minutes).padStart(2, "0")} ${period}`;
+        }
+
+        function finishShift() {
+            gameScreen.classList.add("hidden");
+            endingScreen.classList.remove("hidden");
+
+            const evidenceCount = foundEvidence.size;
+
+            let title;
+            let description;
+
+            if (
+                evidenceCount === 8 &&
+                state.ghostIsolated &&
+                state.reportChoice === "director" &&
+                state.security >= 70
+            ) {
+                title = "ENDING: INSIDE ACCESS";
+
+                description =
+                    "You proved the recurring unauthorized devices were not random intrusions. " +
+                    "A terminated identity was restored with a privileged internal service token, " +
+                    "physical evidence was suppressed, and the same device identity appeared in an older closed case. " +
+                    "You bypassed the compromised reporting path and delivered the evidence directly to the Security Director.";
+            } else if (
+                evidenceCount >= 6 &&
+                state.ghostIsolated &&
+                state.security >= 65
+            ) {
+                title = "ENDING: CONTAINED AGAIN";
+
+                description =
+                    "GHOST-03 was isolated and the immediate threat was contained. " +
+                    "You uncovered significant internal inconsistencies, but the full relationship between the archived case and current access events remains unresolved.";
+            } else if (
+                state.reportChoice === "security" &&
+                foundEvidence.has("suppressedRecovery")
+            ) {
+                title = "ENDING: QUIET COVER-UP";
+
+                description =
+                    "Your evidence returned through the same reporting chain that previously suppressed critical details. " +
+                    "By sunrise, several findings had been removed from the official incident summary.";
+            } else if (
+                state.reportChoice === "close"
+            ) {
+                title = "ENDING: FALSE POSITIVE";
+
+                description =
+                    "The incident was closed as an asset synchronization error. " +
+                    "At 07:16 AM, GHOST-03 appeared on another internal network segment.";
+            } else {
+                title = "ENDING: THE GHOST REMAINS";
+
+                description =
+                    "The shift ends without a complete explanation. " +
+                    "The badge event, archived case, and recurring device identity remain connected by questions nobody has answered.";
+            }
+
+            localStorage.setItem(
+                "aftershift_shift2_best",
+                title
+            );
+
+            document.getElementById("ending-title").textContent = title;
+            document.getElementById("ending-description").textContent =
+                description;
+
+            document.getElementById("ending-health").textContent =
+                `${state.health}%`;
+
+            document.getElementById("ending-security").textContent =
+                `${state.security}%`;
+
+            document.getElementById("ending-trust").textContent =
+                `${state.trust}%`;
+
+            document.getElementById("ending-evidence").textContent =
+                `${evidenceCount} / 8`;
+        }
+
+        function clamp(value) {
+            return Math.max(0, Math.min(100, value));
+        }
+    </script>
+</body>
+</html>
