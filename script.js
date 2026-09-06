@@ -20,6 +20,17 @@ let unknownDeviceIsolated = false;
 
 const discoveredEvidence = new Set();
 
+const coreEvidence = [
+    "suspiciousProcess",
+    "defenderDetection",
+    "failedLogins",
+    "suspiciousConnection",
+    "startupPersistence",
+    "unknownDevice",
+    "lateralMovement",
+    "initialVector"
+];
+
 const evidenceDatabase = {
     suspiciousProcess: {
         title: "Suspicious Process",
@@ -59,8 +70,71 @@ const evidenceDatabase = {
     initialVector: {
         title: "Probable Initial Vector",
         description: "Evidence suggests invoice_viewer.exe downloaded by the Finance user may have been the first stage of the incident."
+    },
+
+    phishingEmail: {
+        title: "Suspicious Invoice Email",
+        description: "Sarah Mitchell received an unexpected invoice email shortly before the first endpoint incident."
+    },
+
+    spoofedDomain: {
+        title: "Spoofed Sender Domain",
+        description: "The invoice message displayed a trusted vendor name, but the actual sender domain was northstar-payrnents.com."
+    },
+
+    maliciousAttachment: {
+        title: "Executable Attachment",
+        description: "The supposed invoice attachment was invoice_viewer.exe rather than a normal PDF or document."
+    },
+
+    timelineReconstruction: {
+        title: "Reconstructed Attack Timeline",
+        description: "Collected evidence establishes a probable sequence from phishing delivery to endpoint compromise, credential attacks, and lateral movement."
     }
 };
+
+const timelineEvents = [
+    {
+        time: "23:21",
+        title: "Invoice email delivered",
+        evidence: "phishingEmail"
+    },
+    {
+        time: "23:34",
+        title: "Defender blocks invoice_viewer.exe",
+        evidence: "defenderDetection"
+    },
+    {
+        time: "23:36",
+        title: "svhost32.exe begins consuming CPU",
+        evidence: "suspiciousProcess"
+    },
+    {
+        time: "00:04",
+        title: "Failed authentication attempts begin",
+        evidence: "failedLogins"
+    },
+    {
+        time: "00:18",
+        title: "FIN-LT-014 contacts unrecognized address",
+        evidence: "suspiciousConnection"
+    },
+    {
+        time: "00:37",
+        title: "Persistence discovered on OPS-PC-021",
+        evidence: "startupPersistence"
+    },
+    {
+        time: "00:44",
+        title: "UNKNOWN-7F2 touches multiple departments",
+        evidence: "lateralMovement"
+    },
+    {
+        time: "01:17",
+        title: "Unauthorized device confirmed",
+        evidence: "unknownDevice"
+    }
+];
 
 const devices = [
     {
@@ -69,35 +143,30 @@ const devices = [
         status: "ONLINE",
         className: "online"
     },
-
     {
         id: "FILE-SRV-02",
         type: "File Server",
         status: "ONLINE",
         className: "online"
     },
-
     {
         id: "FIN-LT-014",
         type: "Finance Laptop",
         status: "WARNING",
         className: "warning"
     },
-
     {
         id: "HR-LT-011",
         type: "HR Laptop",
         status: "ONLINE",
         className: "online"
     },
-
     {
         id: "OPS-PC-021",
         type: "Operations Desktop",
         status: "ONLINE",
         className: "online"
     },
-
     {
         id: "UNKNOWN-7F2",
         type: "Unidentified Device",
@@ -120,7 +189,7 @@ const tickets = [
         evidence: [
             "User reports severe system slowdown"
         ],
-        tip: "Try scanning FIN-LT-014 or reviewing Defender events.",
+        tip: "Try scanning FIN-LT-014, reviewing Defender events, or checking Sarah's mailbox.",
         choices: [
             {
                 text: "Run system diagnostics",
@@ -133,7 +202,6 @@ const tickets = [
                 discover: "suspiciousProcess",
                 logType: "WARNING"
             },
-
             {
                 text: "Restart the computer",
                 result: "The computer restarts and appears normal for several minutes. The underlying cause was not identified.",
@@ -144,7 +212,6 @@ const tickets = [
                 evidence: "Issue temporarily disappeared after restart",
                 logType: "INFO"
             },
-
             {
                 text: "Check security logs",
                 result: "Windows Defender recorded a blocked executable shortly before the slowdown began.",
@@ -156,7 +223,6 @@ const tickets = [
                 discover: "defenderDetection",
                 logType: "SECURITY"
             },
-
             {
                 text: "Ignore until morning",
                 result: "The employee continues working on the affected device. Background activity increases.",
@@ -197,7 +263,6 @@ const tickets = [
                 discover: "failedLogins",
                 logType: "SECURITY"
             },
-
             {
                 text: "Unlock the account",
                 result: "Daniel regains access, but failed authentication attempts continue almost immediately.",
@@ -208,7 +273,6 @@ const tickets = [
                 evidence: "Failed logins resumed immediately after account unlock",
                 logType: "WARNING"
             },
-
             {
                 text: "Disable Daniel's account",
                 result: "The suspicious attempts stop, but Daniel loses access to critical HR systems.",
@@ -219,7 +283,6 @@ const tickets = [
                 evidence: "Account secured but business operations interrupted",
                 logType: "WARNING"
             },
-
             {
                 text: "Reset password and force sign-out",
                 result: "All active sessions are terminated. Failed login attempts continue from UNKNOWN-7F2.",
@@ -260,7 +323,6 @@ const tickets = [
                 evidence: "Outbound connections stopped after network isolation",
                 logType: "SECURITY"
             },
-
             {
                 text: "Run malware investigation",
                 result: "A suspicious startup entry and browser extension are discovered.",
@@ -272,7 +334,6 @@ const tickets = [
                 discover: "startupPersistence",
                 logType: "SECURITY"
             },
-
             {
                 text: "Reinstall Chrome",
                 result: "Chrome is reinstalled, but the browser begins opening pages again.",
@@ -283,7 +344,6 @@ const tickets = [
                 evidence: "Browser reinstall failed to remove suspicious behavior",
                 logType: "WARNING"
             },
-
             {
                 text: "Close the ticket as user error",
                 result: "Twenty minutes later, the endpoint begins sending unusual network traffic.",
@@ -325,7 +385,6 @@ const tickets = [
                 discover: "unknownDevice",
                 logType: "SECURITY"
             },
-
             {
                 text: "Monitor device silently",
                 result: "Monitoring reveals the device attempting connections to Finance, HR, and Operations endpoints.",
@@ -337,7 +396,6 @@ const tickets = [
                 discover: "lateralMovement",
                 logType: "SECURITY"
             },
-
             {
                 text: "Disconnect the entire office network",
                 result: "The threat is contained, but every active employee loses access to company systems.",
@@ -349,7 +407,6 @@ const tickets = [
                 isolateUnknown: true,
                 logType: "WARNING"
             },
-
             {
                 text: "Dismiss as inventory error",
                 result: "UNKNOWN-7F2 remains connected. Minutes later, multiple endpoints begin generating security alerts.",
@@ -364,6 +421,8 @@ const tickets = [
         ]
     }
 ];
+
+installBuild03UI();
 
 startButton.addEventListener("click", startGame);
 continueButton.addEventListener("click", nextTicket);
@@ -380,15 +439,384 @@ terminalInput.addEventListener("keydown", event => {
     }
 });
 
-document.querySelectorAll(".nav-button").forEach(button => {
-    button.addEventListener("click", () => {
-        setActiveView(button.dataset.view);
+attachNavigation();
 
-        if (button.dataset.view === "terminal") {
-            setTimeout(() => terminalInput.focus(), 100);
-        }
+function installBuild03UI() {
+    installBuild03Styles();
+
+    const terminalNav = document.querySelector('[data-view="terminal"]');
+
+    if (terminalNav && !document.querySelector('[data-view="mail"]')) {
+        const mailButton = document.createElement("button");
+        mailButton.className = "nav-button";
+        mailButton.dataset.view = "mail";
+        mailButton.innerHTML = "Mailbox <span>3</span>";
+
+        terminalNav.parentNode.insertBefore(mailButton, terminalNav);
+    }
+
+    const evidenceNav = document.querySelector('[data-view="evidence"]');
+
+    if (evidenceNav && !document.querySelector('[data-view="timeline"]')) {
+        const timelineButton = document.createElement("button");
+        timelineButton.className = "nav-button";
+        timelineButton.dataset.view = "timeline";
+        timelineButton.textContent = "Timeline";
+
+        evidenceNav.parentNode.insertBefore(timelineButton, evidenceNav);
+    }
+
+    const main = document.querySelector("main");
+
+    if (!document.getElementById("mail-view")) {
+        const mailView = document.createElement("section");
+        mailView.id = "mail-view";
+        mailView.className = "view hidden";
+
+        mailView.innerHTML = `
+            <div class="panel-heading">
+                <div>
+                    <p class="section-label">CORPORATE MAIL</p>
+                    <h2>Mailbox</h2>
+                </div>
+                <span class="mail-status">3 MESSAGES</span>
+            </div>
+
+            <div class="mail-layout">
+                <div class="mail-list">
+                    <button class="mail-item suspicious-mail" data-mail="invoice">
+                        <span class="mail-sender">Northstar Payments</span>
+                        <strong>Updated Invoice - Action Required</strong>
+                        <small>11:21 PM</small>
+                    </button>
+
+                    <button class="mail-item" data-mail="maintenance">
+                        <span class="mail-sender">Northstar IT</span>
+                        <strong>Planned maintenance reminder</strong>
+                        <small>8:04 PM</small>
+                    </button>
+
+                    <button class="mail-item" data-mail="security">
+                        <span class="mail-sender">Security Operations</span>
+                        <strong>Weekly security digest</strong>
+                        <small>6:30 PM</small>
+                    </button>
+                </div>
+
+                <div id="mail-content" class="mail-content">
+                    <div class="mail-placeholder">
+                        Select a message to open.
+                    </div>
+                </div>
+            </div>
+        `;
+
+        main.appendChild(mailView);
+    }
+
+    if (!document.getElementById("timeline-view")) {
+        const timelineView = document.createElement("section");
+        timelineView.id = "timeline-view";
+        timelineView.className = "view hidden";
+
+        timelineView.innerHTML = `
+            <div class="panel-heading">
+                <div>
+                    <p class="section-label">INCIDENT CORRELATION</p>
+                    <h2>Attack Timeline</h2>
+                </div>
+                <span id="timeline-progress">0 / 8 EVENTS</span>
+            </div>
+
+            <div class="timeline-intro">
+                Events become visible as supporting evidence is discovered.
+            </div>
+
+            <div id="attack-timeline" class="attack-timeline"></div>
+        `;
+
+        main.appendChild(timelineView);
+    }
+
+    document.querySelectorAll(".mail-item").forEach(button => {
+        button.addEventListener("click", () => {
+            openMail(button.dataset.mail);
+
+            document.querySelectorAll(".mail-item").forEach(item => {
+                item.classList.remove("active");
+            });
+
+            button.classList.add("active");
+        });
     });
-});
+}
+
+function installBuild03Styles() {
+    const style = document.createElement("style");
+
+    style.textContent = `
+        .mail-status,
+        #timeline-progress {
+            color: var(--blue);
+            font-size: 10px;
+        }
+
+        .mail-layout {
+            display: grid;
+            grid-template-columns: 310px 1fr;
+            min-height: 560px;
+        }
+
+        .mail-list {
+            border-right: 1px solid var(--border);
+            background: #090e0f;
+        }
+
+        .mail-item {
+            width: 100%;
+            display: block;
+            text-align: left;
+            border: 0;
+            border-bottom: 1px solid var(--border);
+            border-left: 2px solid transparent;
+            background: transparent;
+            color: var(--text);
+            padding: 18px;
+            cursor: pointer;
+        }
+
+        .mail-item:hover,
+        .mail-item.active {
+            background: #101718;
+            border-left-color: var(--green);
+        }
+
+        .mail-item strong,
+        .mail-item span,
+        .mail-item small {
+            display: block;
+        }
+
+        .mail-sender {
+            color: var(--green);
+            font-size: 10px;
+            margin-bottom: 7px;
+        }
+
+        .mail-item strong {
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .mail-item small {
+            color: var(--muted);
+            margin-top: 8px;
+            font-size: 9px;
+        }
+
+        .suspicious-mail .mail-sender {
+            color: var(--yellow);
+        }
+
+        .mail-content {
+            padding: 28px;
+        }
+
+        .mail-placeholder {
+            color: var(--muted);
+            text-align: center;
+            margin-top: 150px;
+        }
+
+        .mail-header {
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 18px;
+            margin-bottom: 22px;
+        }
+
+        .mail-header h3 {
+            font-family: "Space Grotesk", sans-serif;
+            font-size: 25px;
+            margin: 10px 0 18px;
+        }
+
+        .mail-meta {
+            display: grid;
+            gap: 6px;
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        .mail-body {
+            color: #a7b6b2;
+            font-size: 13px;
+            line-height: 1.8;
+        }
+
+        .attachment {
+            border: 1px solid var(--border);
+            background: #090e0f;
+            padding: 15px;
+            margin: 20px 0;
+        }
+
+        .attachment strong,
+        .attachment span {
+            display: block;
+        }
+
+        .attachment strong {
+            color: var(--yellow);
+            margin-bottom: 6px;
+        }
+
+        .attachment span {
+            color: var(--muted);
+            font-size: 10px;
+        }
+
+        .mail-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 22px;
+        }
+
+        .mail-action {
+            border: 1px solid var(--green);
+            background: transparent;
+            color: var(--green);
+            padding: 11px 15px;
+            cursor: pointer;
+        }
+
+        .mail-action:hover {
+            background: var(--green);
+            color: #05110d;
+        }
+
+        .header-analysis {
+            border: 1px solid var(--yellow);
+            background: rgba(243, 201, 105, 0.04);
+            padding: 15px;
+            margin-top: 20px;
+            white-space: pre-wrap;
+            color: #b9c5c1;
+            font-size: 11px;
+            line-height: 1.8;
+        }
+
+        .timeline-intro {
+            border-bottom: 1px solid var(--border);
+            padding: 15px 22px;
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        .attack-timeline {
+            padding: 25px;
+            position: relative;
+        }
+
+        .timeline-event {
+            display: grid;
+            grid-template-columns: 80px 20px 1fr;
+            min-height: 80px;
+        }
+
+        .timeline-time {
+            color: var(--blue);
+            font-size: 11px;
+            padding-top: 2px;
+        }
+
+        .timeline-marker {
+            position: relative;
+        }
+
+        .timeline-marker::before {
+            content: "";
+            position: absolute;
+            top: 3px;
+            left: 6px;
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: var(--green);
+        }
+
+        .timeline-marker::after {
+            content: "";
+            position: absolute;
+            top: 16px;
+            bottom: 0;
+            left: 10px;
+            width: 1px;
+            background: var(--border);
+        }
+
+        .timeline-event:last-child .timeline-marker::after {
+            display: none;
+        }
+
+        .timeline-description {
+            padding-bottom: 25px;
+        }
+
+        .timeline-description strong {
+            display: block;
+            font-family: "Space Grotesk", sans-serif;
+            font-size: 15px;
+            margin-bottom: 5px;
+        }
+
+        .timeline-description span {
+            color: var(--muted);
+            font-size: 10px;
+        }
+
+        .timeline-event.locked {
+            opacity: 0.22;
+        }
+
+        .timeline-event.locked .timeline-marker::before {
+            background: var(--muted);
+        }
+
+        @media (max-width: 700px) {
+            .mail-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .mail-list {
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+            }
+
+            .mail-content {
+                padding: 18px;
+            }
+        }
+    `;
+
+    document.head.appendChild(style);
+}
+
+function attachNavigation() {
+    document.querySelectorAll(".nav-button").forEach(button => {
+        button.addEventListener("click", () => {
+            setActiveView(button.dataset.view);
+
+            if (button.dataset.view === "terminal") {
+                setTimeout(() => terminalInput.focus(), 100);
+            }
+
+            if (button.dataset.view === "timeline") {
+                renderTimeline();
+            }
+        });
+    });
+}
 
 function startGame() {
     startScreen.classList.add("hidden");
@@ -398,17 +826,181 @@ function startGame() {
     addLog("SYSTEM", "Monitoring services initialized.");
     addLog("WARNING", "Unverified device UNKNOWN-7F2 detected on network.");
 
-    addTerminalLine("NORTHSTAR SECURE SHELL v2.4", "success");
+    addTerminalLine("NORTHSTAR SECURE SHELL v2.7", "success");
     addTerminalLine("Operator: Night IT Technician", "info");
     addTerminalLine("Session: AUTHENTICATED", "success");
     addTerminalLine("");
+    addTerminalLine("Build 0.3 investigation modules loaded.", "info");
     addTerminalLine("Type \"help\" for available commands.");
 
     renderNetwork();
     renderTicket();
     renderEvidenceBoard();
+    renderTimeline();
     updateStats();
     updateClock();
+}
+
+function openMail(mailId) {
+    const container = document.getElementById("mail-content");
+
+    if (mailId === "invoice") {
+        container.innerHTML = `
+            <div class="mail-header">
+                <p class="section-label">MESSAGE ID: INV-2048</p>
+                <h3>Updated Invoice - Action Required</h3>
+
+                <div class="mail-meta">
+                    <span>From: Northstar Payments &lt;billing@northstar-payments.com&gt;</span>
+                    <span>To: Sarah Mitchell &lt;s.mitchell@northstar.internal&gt;</span>
+                    <span>Time: 11:21 PM</span>
+                </div>
+            </div>
+
+            <div class="mail-body">
+                <p>Hello Sarah,</p>
+
+                <p>
+                    Please review the updated invoice before tomorrow morning.
+                    The attached viewer contains the revised billing details.
+                </p>
+
+                <p>Regards,<br>Northstar Payments</p>
+
+                <div class="attachment">
+                    <strong>📎 invoice_viewer.exe</strong>
+                    <span>Attachment size: 284 KB</span>
+                </div>
+
+                <div class="mail-actions">
+                    <button class="mail-action" id="inspect-headers">
+                        INSPECT HEADERS
+                    </button>
+
+                    <button class="mail-action" id="analyze-attachment">
+                        ANALYZE ATTACHMENT
+                    </button>
+                </div>
+
+                <div id="mail-analysis"></div>
+            </div>
+        `;
+
+        discoverEvidence("phishingEmail");
+
+        document.getElementById("inspect-headers").addEventListener("click", inspectInvoiceHeaders);
+        document.getElementById("analyze-attachment").addEventListener("click", analyzeInvoiceAttachment);
+
+        return;
+    }
+
+    if (mailId === "maintenance") {
+        container.innerHTML = `
+            <div class="mail-header">
+                <p class="section-label">INTERNAL MESSAGE</p>
+                <h3>Planned maintenance reminder</h3>
+
+                <div class="mail-meta">
+                    <span>From: Northstar IT &lt;it@northstar.internal&gt;</span>
+                    <span>Time: 8:04 PM</span>
+                </div>
+            </div>
+
+            <div class="mail-body">
+                <p>
+                    Reminder: File server maintenance begins Saturday at 03:00 AM.
+                    No user action is required.
+                </p>
+            </div>
+        `;
+
+        return;
+    }
+
+    if (mailId === "security") {
+        container.innerHTML = `
+            <div class="mail-header">
+                <p class="section-label">SECURITY OPERATIONS</p>
+                <h3>Weekly security digest</h3>
+
+                <div class="mail-meta">
+                    <span>From: SOC &lt;soc@northstar.internal&gt;</span>
+                    <span>Time: 6:30 PM</span>
+                </div>
+            </div>
+
+            <div class="mail-body">
+                <p>
+                    No critical security incidents were reported during the previous seven days.
+                </p>
+
+                <p>
+                    Reminder: External executable attachments should be treated as suspicious.
+                </p>
+            </div>
+        `;
+    }
+}
+
+function inspectInvoiceHeaders() {
+    discoverEvidence("spoofedDomain");
+
+    const analysis = document.getElementById("mail-analysis");
+
+    analysis.innerHTML = `
+        <div class="header-analysis">
+VISIBLE FROM:
+Northstar Payments &lt;billing@northstar-payments.com&gt;
+
+RETURN-PATH:
+billing@northstar-payrnents.com
+
+REPLY-TO:
+billing@northstar-payrnents.com
+
+AUTHENTICATION:
+SPF: FAIL
+DKIM: NONE
+
+WARNING:
+Displayed sender and actual return domain do not match.
+        </div>
+    `;
+}
+
+function analyzeInvoiceAttachment() {
+    discoverEvidence("maliciousAttachment");
+
+    const analysis = document.getElementById("mail-analysis");
+
+    analysis.innerHTML = `
+        <div class="header-analysis">
+ATTACHMENT:
+invoice_viewer.exe
+
+TYPE:
+Windows Executable
+
+SIZE:
+284 KB
+
+SHA-256:
+c83d7e1f96b78a2f...91a2048d
+
+INTERNAL REPUTATION:
+UNTRUSTED
+
+WARNING:
+Executable attachment disguised as invoice content.
+        </div>
+    `;
+
+    if (
+        discoveredEvidence.has("defenderDetection") &&
+        discoveredEvidence.has("suspiciousProcess")
+    ) {
+        discoverEvidence("initialVector");
+    }
 }
 
 function renderTicket() {
@@ -421,7 +1013,6 @@ function renderTicket() {
     document.getElementById("department").textContent = ticket.department;
     document.getElementById("device").textContent = ticket.device;
     document.getElementById("device-status").textContent = getDeviceStatus(ticket.device);
-
     document.getElementById("investigation-tip-text").textContent = ticket.tip;
 
     const severityBadge = document.getElementById("severity-badge");
@@ -571,7 +1162,7 @@ function isolateUnknownDevice() {
     addLog("SECURITY", "UNKNOWN-7F2 isolated from company network.");
 }
 
-function discoverEvidence(key) {
+function discoverEvidence(key, checkTimeline = true) {
     if (!evidenceDatabase[key]) {
         return;
     }
@@ -591,6 +1182,35 @@ function discoverEvidence(key) {
         `New evidence discovered: ${evidence.title}`;
 
     renderEvidenceBoard();
+    renderTimeline();
+
+    if (checkTimeline) {
+        checkTimelineReconstruction();
+    }
+}
+
+function checkTimelineReconstruction() {
+    const required = [
+        "phishingEmail",
+        "spoofedDomain",
+        "maliciousAttachment",
+        "defenderDetection",
+        "suspiciousProcess",
+        "failedLogins",
+        "suspiciousConnection",
+        "lateralMovement"
+    ];
+
+    const complete = required.every(key => discoveredEvidence.has(key));
+
+    if (complete && !discoveredEvidence.has("timelineReconstruction")) {
+        discoverEvidence("timelineReconstruction", false);
+
+        addTerminalLine(
+            "CORRELATION COMPLETE: Attack timeline reconstructed.",
+            "success"
+        );
+    }
 }
 
 function renderEvidenceBoard() {
@@ -609,7 +1229,9 @@ function renderEvidenceBoard() {
             </span>
 
             <h3>
-                ${discovered ? evidence.title : `Evidence ${String(index + 1).padStart(2, "0")}`}
+                ${discovered
+                    ? evidence.title
+                    : `Evidence ${String(index + 1).padStart(2, "0")}`}
             </h3>
 
             <p>
@@ -623,8 +1245,57 @@ function renderEvidenceBoard() {
     });
 
     document.getElementById("evidence-count").textContent = discoveredEvidence.size;
+
     document.getElementById("case-progress").textContent =
         `${discoveredEvidence.size} / ${Object.keys(evidenceDatabase).length} DISCOVERED`;
+}
+
+function renderTimeline() {
+    const timeline = document.getElementById("attack-timeline");
+
+    if (!timeline) {
+        return;
+    }
+
+    timeline.innerHTML = "";
+
+    let unlocked = 0;
+
+    timelineEvents.forEach(event => {
+        const discovered = discoveredEvidence.has(event.evidence);
+
+        if (discovered) {
+            unlocked++;
+        }
+
+        const item = document.createElement("div");
+        item.className = `timeline-event ${discovered ? "" : "locked"}`;
+
+        item.innerHTML = `
+            <div class="timeline-time">
+                ${discovered ? event.time : "--:--"}
+            </div>
+
+            <div class="timeline-marker"></div>
+
+            <div class="timeline-description">
+                <strong>
+                    ${discovered ? event.title : "Unknown Event"}
+                </strong>
+
+                <span>
+                    ${discovered
+                        ? evidenceDatabase[event.evidence].title
+                        : "Supporting evidence has not been discovered."}
+                </span>
+            </div>
+        `;
+
+        timeline.appendChild(item);
+    });
+
+    document.getElementById("timeline-progress").textContent =
+        `${unlocked} / ${timelineEvents.length} EVENTS`;
 }
 
 function executeTerminalCommand(rawCommand) {
@@ -661,6 +1332,19 @@ function executeTerminalCommand(rawCommand) {
         return;
     }
 
+    if (lower === "mail") {
+        addTerminalLine("MAIL INDEX", "info");
+        addTerminalLine("INV-2048  23:21  Northstar Payments  Updated Invoice");
+        addTerminalLine("IT-8831   20:04  Northstar IT        Maintenance Reminder");
+        addTerminalLine("SOC-4420  18:30  Security Ops        Weekly Digest");
+        return;
+    }
+
+    if (lower === "timeline") {
+        showTerminalTimeline();
+        return;
+    }
+
     const parts = normalized.split(/\s+/);
     const command = parts[0].toLowerCase();
     const argument = parts.slice(1).join(" ");
@@ -690,6 +1374,16 @@ function executeTerminalCommand(rawCommand) {
         return;
     }
 
+    if (command === "headers") {
+        runHeaders(argument);
+        return;
+    }
+
+    if (command === "hash") {
+        runHash(argument);
+        return;
+    }
+
     addTerminalLine(`Command not recognized: ${normalized}`, "danger");
     addTerminalLine("Type \"help\" for available commands.");
 }
@@ -705,6 +1399,10 @@ function showTerminalHelp() {
     addTerminalLine("lookup <name/device>       Search company directory");
     addTerminalLine("connections <device>       Show network connections");
     addTerminalLine("isolate <device>           Isolate suspicious device");
+    addTerminalLine("mail                       List mailbox messages");
+    addTerminalLine("headers INV-2048           Inspect suspicious email headers");
+    addTerminalLine("hash invoice_viewer.exe    Analyze attachment hash");
+    addTerminalLine("timeline                   View reconstructed events");
     addTerminalLine("evidence                   View discovered evidence");
     addTerminalLine("whoami                     Display operator identity");
     addTerminalLine("clear                      Clear terminal");
@@ -716,7 +1414,7 @@ function showSystemStatus() {
     addTerminalLine(`Security: ${security}%`);
     addTerminalLine(`Employee Trust: ${trust}%`);
     addTerminalLine(`Open Tickets: ${Math.max(tickets.length - currentTicket, 0)}`);
-    addTerminalLine(`Evidence Found: ${discoveredEvidence.size}/8`);
+    addTerminalLine(`Evidence Found: ${discoveredEvidence.size}/12`);
     addTerminalLine(
         `UNKNOWN-7F2: ${unknownDeviceIsolated ? "ISOLATED" : "CONNECTED"}`,
         unknownDeviceIsolated ? "success" : "danger"
@@ -734,6 +1432,60 @@ function showEvidenceList() {
     discoveredEvidence.forEach(key => {
         addTerminalLine(`- ${evidenceDatabase[key].title}`);
     });
+}
+
+function showTerminalTimeline() {
+    addTerminalLine("INCIDENT TIMELINE", "info");
+
+    timelineEvents.forEach(event => {
+        if (discoveredEvidence.has(event.evidence)) {
+            addTerminalLine(`${event.time}  ${event.title}`);
+        } else {
+            addTerminalLine("--:--  [EVENT UNRESOLVED]", "warning");
+        }
+    });
+}
+
+function runHeaders(target) {
+    if (target.toUpperCase() !== "INV-2048") {
+        addTerminalLine("Usage: headers INV-2048", "warning");
+        return;
+    }
+
+    addTerminalLine("MESSAGE HEADER ANALYSIS", "info");
+    addTerminalLine("");
+    addTerminalLine("Visible From: billing@northstar-payments.com");
+    addTerminalLine("Return-Path: billing@northstar-payrnents.com", "danger");
+    addTerminalLine("Reply-To: billing@northstar-payrnents.com", "danger");
+    addTerminalLine("SPF: FAIL", "danger");
+    addTerminalLine("DKIM: NONE", "warning");
+    addTerminalLine("");
+    addTerminalLine("Domain mismatch detected.", "danger");
+
+    discoverEvidence("phishingEmail");
+    discoverEvidence("spoofedDomain");
+}
+
+function runHash(target) {
+    if (target.toLowerCase() !== "invoice_viewer.exe") {
+        addTerminalLine("Usage: hash invoice_viewer.exe", "warning");
+        return;
+    }
+
+    addTerminalLine("FILE ANALYSIS", "info");
+    addTerminalLine("Name: invoice_viewer.exe");
+    addTerminalLine("Type: Windows Executable");
+    addTerminalLine("SHA-256: c83d7e1f96b78a2f...91a2048d");
+    addTerminalLine("Reputation: UNTRUSTED", "danger");
+
+    discoverEvidence("maliciousAttachment");
+
+    if (
+        discoveredEvidence.has("defenderDetection") &&
+        discoveredEvidence.has("suspiciousProcess")
+    ) {
+        discoverEvidence("initialVector");
+    }
 }
 
 function runScan(target) {
@@ -826,13 +1578,10 @@ function runLogs(type) {
 
         discoverEvidence("defenderDetection");
 
-        if (discoveredEvidence.has("suspiciousProcess")) {
-            addTerminalLine("");
-            addTerminalLine(
-                "CORRELATION: Threat event occurred shortly before svhost32.exe appeared.",
-                "warning"
-            );
-
+        if (
+            discoveredEvidence.has("suspiciousProcess") &&
+            discoveredEvidence.has("maliciousAttachment")
+        ) {
             discoverEvidence("initialVector");
         }
 
@@ -944,7 +1693,7 @@ function runIsolation(target) {
 
     if (device !== "UNKNOWN-7F2") {
         addTerminalLine(
-            `Isolation denied for ${device}. This simulation currently allows containment of UNKNOWN-7F2 only.`,
+            `Isolation denied for ${device}. Current containment policy permits UNKNOWN-7F2 only.`,
             "warning"
         );
         return;
@@ -1093,15 +1842,24 @@ function finishShift() {
     let description = "";
 
     const evidenceCount = discoveredEvidence.size;
+    const coreComplete = coreEvidence.every(key => discoveredEvidence.has(key));
 
     if (
-        evidenceCount === Object.keys(evidenceDatabase).length &&
+        evidenceCount === 12 &&
+        unknownDeviceIsolated &&
+        security >= 70
+    ) {
+        title = "ENDING: FULL ATTRIBUTION";
+        description =
+            "You reconstructed the entire incident. The malicious invoice, spoofed sender, executable attachment, endpoint compromise, credential attacks, external connections, persistence, and lateral movement now form a complete chain. UNKNOWN-7F2 was contained and morning security receives a fully correlated case file.";
+    } else if (
+        coreComplete &&
         unknownDeviceIsolated &&
         security >= 70
     ) {
         title = "ENDING: ROOT CAUSE";
         description =
-            "You did more than contain the incident. You reconstructed the chain of events, identified the probable initial compromise, mapped the suspicious device activity, and preserved the evidence. Morning security receives a complete incident timeline instead of a mystery.";
+            "You identified the probable compromise chain and contained the unauthorized device. The technical root cause is understood, although parts of the delivery mechanism remain unresolved.";
     } else if (security < 45 && !unknownDeviceIsolated) {
         title = "ENDING: THE BREACH";
         description =
@@ -1112,16 +1870,16 @@ function finishShift() {
             "The company survived the night, but your response caused major disruption. Systems were secured at the cost of employee trust and business operations.";
     } else if (
         unknownDeviceIsolated &&
-        evidenceCount >= 4 &&
+        evidenceCount >= 5 &&
         security >= 70
     ) {
         title = "ENDING: CONTAINMENT";
         description =
-            "You connected enough of the incidents to recognize the threat. UNKNOWN-7F2 was contained and the immediate danger passed, though parts of the attack chain remain unanswered.";
+            "You recognized enough of the pattern to contain the immediate threat. Several questions remain unanswered, but the attacker no longer has an active foothold.";
     } else {
         title = "ENDING: SOMETHING REMAINS";
         description =
-            "The immediate incidents were handled, but the evidence does not completely fit. Some answers are still buried in the network logs, and the full story of UNKNOWN-7F2 remains unresolved.";
+            "The immediate incidents were handled, but the evidence does not completely fit. Important pieces of the attack chain remain buried in the company's systems.";
     }
 
     document.getElementById("ending-title").textContent = title;
