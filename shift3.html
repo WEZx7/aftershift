@@ -1,0 +1,1888 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AFTERSHIFT // SHIFT 3</title>
+
+    <style>
+        :root {
+            --bg: #05090a;
+            --panel: #0a1011;
+            --panel2: #0e1516;
+            --border: #243131;
+            --text: #d8dfdc;
+            --muted: #7f8d88;
+            --green: #66efb2;
+            --blue: #6fd8ff;
+            --yellow: #ecc66c;
+            --red: #ff6b6b;
+            --purple: #c59cff;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: var(--bg);
+            color: var(--text);
+            font-family: "Courier New", monospace;
+        }
+
+        button,
+        input {
+            font: inherit;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .scanlines {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 999;
+            opacity: 0.045;
+            background: repeating-linear-gradient(
+                to bottom,
+                transparent 0,
+                transparent 2px,
+                white 3px,
+                transparent 4px
+            );
+        }
+
+        #start-screen {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+            background:
+                radial-gradient(circle at center, #101d1b 0%, #05090a 60%);
+        }
+
+        .briefing {
+            width: min(800px, 100%);
+            border: 1px solid var(--border);
+            padding: 45px;
+            background: rgba(5, 9, 10, 0.96);
+        }
+
+        .label {
+            color: var(--green);
+            letter-spacing: 3px;
+            font-size: 11px;
+        }
+
+        .briefing h1 {
+            font-size: clamp(50px, 9vw, 88px);
+            letter-spacing: -4px;
+            margin: 12px 0 0;
+        }
+
+        .briefing h2 {
+            font-weight: normal;
+            color: var(--muted);
+            margin-top: 4px;
+        }
+
+        .incident-box {
+            border-left: 2px solid var(--red);
+            background: #090f10;
+            padding: 20px 24px;
+            margin: 32px 0;
+            line-height: 1.8;
+            color: #aab6b1;
+            font-size: 13px;
+        }
+
+        .incident-box strong {
+            color: var(--red);
+        }
+
+        .call-preview {
+            border: 1px solid var(--border);
+            background: #040708;
+            padding: 22px;
+            margin: 25px 0;
+        }
+
+        .call-preview span {
+            color: var(--red);
+            font-size: 10px;
+            letter-spacing: 2px;
+        }
+
+        .call-preview p {
+            font-size: 17px;
+            margin: 17px 0 0;
+            color: #c6cfcb;
+        }
+
+        .primary-button {
+            width: 100%;
+            border: 1px solid var(--green);
+            background: var(--green);
+            color: #04100c;
+            padding: 17px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .primary-button:hover {
+            background: transparent;
+            color: var(--green);
+        }
+
+        .version {
+            color: #47534f;
+            text-align: right;
+            font-size: 9px;
+            margin-top: 16px;
+        }
+
+        header {
+            height: 72px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 25px;
+            background: #070c0d;
+        }
+
+        .logo {
+            font-size: 21px;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        .logo small {
+            font-size: 9px;
+            color: var(--muted);
+            margin-left: 12px;
+        }
+
+        #clock {
+            font-size: 16px;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 225px 1fr;
+            min-height: calc(100vh - 110px);
+        }
+
+        aside {
+            border-right: 1px solid var(--border);
+            padding: 25px 15px;
+            background: #070c0d;
+        }
+
+        .nav-label {
+            color: var(--green);
+            letter-spacing: 2px;
+            font-size: 10px;
+            margin: 0 10px 15px;
+        }
+
+        .nav {
+            width: 100%;
+            border: none;
+            border-left: 2px solid transparent;
+            background: transparent;
+            color: var(--muted);
+            padding: 13px 14px;
+            margin-bottom: 4px;
+            text-align: left;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .nav:hover {
+            background: var(--panel);
+            color: var(--text);
+        }
+
+        .nav.active {
+            color: var(--green);
+            border-left-color: var(--green);
+            background: var(--panel);
+        }
+
+        .nav span {
+            font-size: 9px;
+            border-radius: 20px;
+            background: #14201d;
+            padding: 2px 7px;
+        }
+
+        .operator {
+            border-top: 1px solid var(--border);
+            margin-top: 35px;
+            padding: 20px 10px;
+            font-size: 10px;
+            color: var(--muted);
+            line-height: 1.7;
+        }
+
+        .operator strong {
+            color: var(--text);
+        }
+
+        main {
+            padding: 24px;
+            overflow: auto;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .stat {
+            border: 1px solid var(--border);
+            padding: 17px;
+            background: var(--panel);
+        }
+
+        .stat span {
+            font-size: 9px;
+            color: var(--muted);
+            letter-spacing: 1px;
+        }
+
+        .stat strong {
+            display: block;
+            font-size: 25px;
+            margin: 8px 0;
+        }
+
+        .meter {
+            height: 4px;
+            background: #172020;
+        }
+
+        .meter div {
+            height: 100%;
+            transition: 0.4s;
+            background: var(--green);
+        }
+
+        .view {
+            border: 1px solid var(--border);
+            background: var(--panel);
+        }
+
+        .view-header {
+            padding: 20px 22px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .view-header p {
+            margin: 0 0 7px;
+            color: var(--green);
+            font-size: 10px;
+            letter-spacing: 2px;
+        }
+
+        .view-header h2 {
+            margin: 0;
+            font-size: 23px;
+        }
+
+        .danger-badge {
+            color: var(--red);
+            border: 1px solid var(--red);
+            padding: 6px 10px;
+            font-size: 9px;
+        }
+
+        .call-panel {
+            padding: 25px;
+        }
+
+        .call-card {
+            border: 1px solid var(--border);
+            background: #060a0b;
+            padding: 22px;
+        }
+
+        .call-meta {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            border: 1px solid var(--border);
+            margin-bottom: 20px;
+        }
+
+        .call-meta div {
+            padding: 14px;
+            border-right: 1px solid var(--border);
+        }
+
+        .call-meta div:last-child {
+            border-right: none;
+        }
+
+        .call-meta span {
+            display: block;
+            color: var(--muted);
+            font-size: 8px;
+            margin-bottom: 6px;
+        }
+
+        .transcript {
+            border-left: 2px solid var(--red);
+            background: #0d1314;
+            padding: 18px;
+            line-height: 1.8;
+            color: #b7c1bd;
+            margin: 20px 0;
+        }
+
+        .action-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .action-button {
+            border: 1px solid var(--green);
+            background: transparent;
+            color: var(--green);
+            padding: 11px 16px;
+            cursor: pointer;
+        }
+
+        .action-button:hover {
+            background: var(--green);
+            color: #04100c;
+        }
+
+        .messages,
+        .directory-list,
+        .signal-map {
+            padding: 20px;
+        }
+
+        .message {
+            border: 1px solid var(--border);
+            padding: 18px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            background: #081011;
+        }
+
+        .message:hover {
+            border-color: var(--green);
+        }
+
+        .message.unverified {
+            border-color: rgba(255, 107, 107, 0.4);
+        }
+
+        .message.verified {
+            border-color: rgba(102, 239, 178, 0.4);
+        }
+
+        .message strong,
+        .message span {
+            display: block;
+        }
+
+        .message span {
+            color: var(--muted);
+            font-size: 10px;
+            margin-top: 6px;
+        }
+
+        .message-body {
+            margin-top: 14px;
+            color: #b3bfba;
+            line-height: 1.8;
+            font-size: 12px;
+        }
+
+        .directory-record {
+            border-bottom: 1px solid var(--border);
+            padding: 17px;
+            display: grid;
+            grid-template-columns: 1.2fr 1fr 1fr;
+            gap: 10px;
+        }
+
+        .directory-record span {
+            color: var(--muted);
+            font-size: 10px;
+        }
+
+        .offline {
+            color: var(--red);
+        }
+
+        .online {
+            color: var(--green);
+        }
+
+        .signal-node {
+            border: 1px solid var(--border);
+            padding: 18px;
+            margin-bottom: 12px;
+            position: relative;
+        }
+
+        .signal-node::before {
+            content: "";
+            position: absolute;
+            right: 16px;
+            top: 17px;
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: var(--green);
+        }
+
+        .signal-node.suspicious::before {
+            background: var(--red);
+        }
+
+        .signal-node.hidden-node {
+            opacity: 0.25;
+        }
+
+        .signal-node strong {
+            display: block;
+        }
+
+        .signal-node span {
+            display: block;
+            color: var(--muted);
+            font-size: 10px;
+            margin-top: 7px;
+        }
+
+        .terminal {
+            min-height: 560px;
+            background: #040708;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #terminal-output {
+            flex: 1;
+            overflow-y: auto;
+            max-height: 525px;
+        }
+
+        .terminal-line {
+            white-space: pre-wrap;
+            color: #a8b4af;
+            font-size: 12px;
+            line-height: 1.7;
+            margin-bottom: 3px;
+        }
+
+        .terminal-line.green {
+            color: var(--green);
+        }
+
+        .terminal-line.red {
+            color: var(--red);
+        }
+
+        .terminal-line.blue {
+            color: var(--blue);
+        }
+
+        .terminal-line.yellow {
+            color: var(--yellow);
+        }
+
+        .terminal-line.purple {
+            color: var(--purple);
+        }
+
+        .terminal-line.command {
+            color: var(--text);
+        }
+
+        .terminal-input-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-top: 1px solid var(--border);
+            padding-top: 15px;
+            margin-top: 15px;
+            color: var(--green);
+        }
+
+        #terminal-input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            color: var(--text);
+            outline: none;
+        }
+
+        .evidence-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            padding: 20px;
+        }
+
+        .evidence {
+            border: 1px solid var(--border);
+            padding: 18px;
+            min-height: 145px;
+        }
+
+        .evidence.locked {
+            opacity: 0.28;
+        }
+
+        .evidence.found {
+            border-color: rgba(102, 239, 178, 0.45);
+        }
+
+        .evidence span {
+            color: var(--green);
+            font-size: 9px;
+            letter-spacing: 1px;
+        }
+
+        .evidence.locked span {
+            color: var(--muted);
+        }
+
+        .evidence h3 {
+            font-size: 17px;
+            margin: 12px 0 8px;
+        }
+
+        .evidence p {
+            color: var(--muted);
+            line-height: 1.7;
+            font-size: 11px;
+            margin: 0;
+        }
+
+        .decision {
+            padding: 25px;
+            max-width: 900px;
+        }
+
+        .decision p {
+            color: var(--muted);
+            line-height: 1.8;
+        }
+
+        .decision-options {
+            display: grid;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        .decision-button {
+            border: 1px solid var(--border);
+            background: #0d1415;
+            color: var(--text);
+            padding: 17px;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .decision-button:hover {
+            border-color: var(--green);
+        }
+
+        footer {
+            height: 38px;
+            border-top: 1px solid var(--border);
+            background: #070c0d;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 9px;
+            color: var(--muted);
+        }
+
+        #ending-screen {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+        }
+
+        .ending {
+            width: min(760px, 100%);
+            border: 1px solid var(--border);
+            padding: 42px;
+        }
+
+        .ending h1 {
+            font-size: clamp(42px, 8vw, 68px);
+            margin: 22px 0;
+        }
+
+        .ending > p {
+            color: var(--muted);
+            line-height: 1.9;
+        }
+
+        .ending-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin: 30px 0;
+        }
+
+        .ending-stats div {
+            border: 1px solid var(--border);
+            padding: 14px;
+        }
+
+        .ending-stats span {
+            display: block;
+            color: var(--muted);
+            font-size: 8px;
+        }
+
+        .ending-stats strong {
+            display: block;
+            margin-top: 7px;
+            font-size: 22px;
+        }
+
+        @media (max-width: 850px) {
+            .layout {
+                grid-template-columns: 1fr;
+            }
+
+            aside {
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 4px;
+            }
+
+            .nav-label,
+            .operator {
+                display: none;
+            }
+
+            .stats {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .call-meta {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .directory-record {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 550px) {
+            main {
+                padding: 12px;
+            }
+
+            aside {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .stats {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .call-meta,
+            .directory-record,
+            .evidence-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .briefing {
+                padding: 27px;
+            }
+
+            .ending-stats {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            header {
+                padding: 0 12px;
+            }
+
+            .logo small {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="scanlines"></div>
+
+    <section id="start-screen">
+        <div class="briefing">
+            <p class="label">NORTHSTAR SYSTEMS // COMMUNICATIONS INCIDENT</p>
+
+            <h1>AFTERSHIFT</h1>
+            <h2>SHIFT 3 // DEAD CHANNEL</h2>
+
+            <div class="incident-box">
+                <strong>PREVIOUS CASE RESULT:</strong><br>
+                <span id="previous-ending">INSIDE ACCESS</span><br><br>
+
+                Security Director received evidence regarding compromised
+                internal credentials and suppressed incident records.<br><br>
+
+                Director status changed to:
+                <strong>OFFLINE</strong>
+            </div>
+
+            <div class="call-preview">
+                <span>03:12 AM // INTERNAL CALL</span>
+                <p>
+                    EXTENSION: 0000<br><br>
+                    "You shouldn't have sent that report."
+                </p>
+            </div>
+
+            <button id="start-button" class="primary-button">
+                BEGIN SHIFT 3
+            </button>
+
+            <p class="version">BUILD 0.5 // CAMPAIGN CHAPTER 03</p>
+        </div>
+    </section>
+
+    <section id="game-screen" class="hidden">
+        <header>
+            <div class="logo">
+                AFTERSHIFT
+                <small>SHIFT 3 // DEAD CHANNEL</small>
+            </div>
+
+            <div id="clock">03:12 AM</div>
+        </header>
+
+        <div class="layout">
+            <aside>
+                <p class="nav-label">COMMUNICATIONS</p>
+
+                <button class="nav active" data-view="calls">
+                    Calls
+                    <span>1</span>
+                </button>
+
+                <button class="nav" data-view="messages">
+                    Messages
+                    <span>3</span>
+                </button>
+
+                <button class="nav" data-view="directory">
+                    Directory
+                </button>
+
+                <button class="nav" data-view="signals">
+                    Signal Map
+                </button>
+
+                <button class="nav" data-view="terminal">
+                    Terminal
+                </button>
+
+                <button class="nav" data-view="evidence">
+                    Evidence
+                    <span id="evidence-count">0</span>
+                </button>
+
+                <button id="decision-nav" class="nav hidden" data-view="decision">
+                    Final Decision
+                    <span>!</span>
+                </button>
+
+                <div class="operator">
+                    OPERATOR<br>
+                    <strong>Night IT Technician</strong><br>
+                    Clearance: Level 2<br><br>
+
+                    Communications Trust:<br>
+                    DEGRADED
+                </div>
+            </aside>
+
+            <main>
+                <section class="stats">
+                    <div class="stat">
+                        <span>INFRASTRUCTURE</span>
+                        <strong id="infra-value">100%</strong>
+
+                        <div class="meter">
+                            <div id="infra-bar"></div>
+                        </div>
+                    </div>
+
+                    <div class="stat">
+                        <span>SECURITY</span>
+                        <strong id="security-value">100%</strong>
+
+                        <div class="meter">
+                            <div id="security-bar"></div>
+                        </div>
+                    </div>
+
+                    <div class="stat">
+                        <span>IDENTITY CONFIDENCE</span>
+                        <strong id="identity-value">42%</strong>
+
+                        <div class="meter">
+                            <div id="identity-bar"></div>
+                        </div>
+                    </div>
+
+                    <div class="stat">
+                        <span>EVIDENCE</span>
+                        <strong id="evidence-stat">0 / 8</strong>
+                    </div>
+                </section>
+
+                <section id="calls-view" class="view">
+                    <div class="view-header">
+                        <div>
+                            <p>VOICE SYSTEM</p>
+                            <h2>Internal Call Record</h2>
+                        </div>
+
+                        <span class="danger-badge">UNVERIFIED</span>
+                    </div>
+
+                    <div class="call-panel">
+                        <div class="call-card">
+                            <div class="call-meta">
+                                <div>
+                                    <span>CALL ID</span>
+                                    <strong>CALL-0000</strong>
+                                </div>
+
+                                <div>
+                                    <span>EXTENSION</span>
+                                    <strong>0000</strong>
+                                </div>
+
+                                <div>
+                                    <span>TIME</span>
+                                    <strong>03:12 AM</strong>
+                                </div>
+
+                                <div>
+                                    <span>DURATION</span>
+                                    <strong>00:08</strong>
+                                </div>
+                            </div>
+
+                            <div class="transcript">
+                                UNKNOWN CALLER:<br><br>
+                                "You shouldn't have sent that report."
+                                <br><br>
+                                [CALL TERMINATED]
+                            </div>
+
+                            <div class="action-row">
+                                <button id="metadata-button" class="action-button">
+                                    ANALYZE METADATA
+                                </button>
+
+                                <button id="voice-button" class="action-button">
+                                    ANALYZE VOICE
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="messages-view" class="view hidden">
+                    <div class="view-header">
+                        <div>
+                            <p>INTERNAL MESSAGING</p>
+                            <h2>Recent Messages</h2>
+                        </div>
+                    </div>
+
+                    <div class="messages">
+                        <div id="director-message" class="message unverified">
+                            <strong>Security Director // Adrian Cole</strong>
+
+                            <span>03:14 AM // SIGNATURE UNKNOWN</span>
+
+                            <div class="message-body">
+                                Stop investigating communications immediately.
+                                Upload all evidence to ARCHIVE-NULL and close the
+                                incident.<br><br>
+
+                                Do not contact Lena Park.
+                            </div>
+                        </div>
+
+                        <div id="lena-message" class="message">
+                            <strong>Lena Park // Morning Security</strong>
+
+                            <span>03:16 AM // IDENTITY UNVERIFIED</span>
+
+                            <div class="message-body">
+                                If you're still online, verify me before trusting
+                                this message.<br><br>
+
+                                Challenge phrase:
+                                COBALT-SUN-14
+                            </div>
+                        </div>
+
+                        <div class="message verified">
+                            <strong>Automated Infrastructure Monitor</strong>
+
+                            <span>03:18 AM // SYSTEM SIGNED</span>
+
+                            <div class="message-body">
+                                Internal communications relay RELAY-09 is producing
+                                abnormal routing events.
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="directory-view" class="view hidden">
+                    <div class="view-header">
+                        <div>
+                            <p>IDENTITY SERVICES</p>
+                            <h2>Directory</h2>
+                        </div>
+                    </div>
+
+                    <div class="directory-list">
+                        <div class="directory-record">
+                            <strong>Adrian Cole</strong>
+                            <span>Security Director</span>
+                            <span class="offline">OFFLINE</span>
+                        </div>
+
+                        <div class="directory-record">
+                            <strong>Lena Park</strong>
+                            <span>Security Analyst</span>
+                            <span class="online">ONLINE</span>
+                        </div>
+
+                        <div class="directory-record">
+                            <strong>RELAY-09</strong>
+                            <span>Communications Service</span>
+                            <span class="offline">UNVERIFIED</span>
+                        </div>
+
+                        <div class="directory-record">
+                            <strong>ARCHIVE-NULL</strong>
+                            <span>No Registered Owner</span>
+                            <span class="offline">UNKNOWN</span>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="signals-view" class="view hidden">
+                    <div class="view-header">
+                        <div>
+                            <p>NETWORK COMMUNICATIONS</p>
+                            <h2>Signal Map</h2>
+                        </div>
+                    </div>
+
+                    <div class="signal-map">
+                        <div class="signal-node">
+                            <strong>VOICE-GW-01</strong>
+                            <span>Internal voice gateway // NORMAL</span>
+                        </div>
+
+                        <div class="signal-node">
+                            <strong>MSG-HUB-02</strong>
+                            <span>Messaging service // NORMAL</span>
+                        </div>
+
+                        <div id="relay-node" class="signal-node suspicious hidden-node">
+                            <strong>RELAY-09</strong>
+                            <span>Routing relay // SOURCE UNKNOWN</span>
+                        </div>
+
+                        <div class="signal-node">
+                            <strong>AUTH-SVC</strong>
+                            <span>Identity provider // DEGRADED</span>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="terminal-view" class="view hidden">
+                    <div class="view-header">
+                        <div>
+                            <p>NORTHSTAR SECURE SHELL</p>
+                            <h2>Communications Terminal</h2>
+                        </div>
+                    </div>
+
+                    <div class="terminal">
+                        <div id="terminal-output"></div>
+
+                        <div class="terminal-input-row">
+                            <span>aftershift&gt;</span>
+
+                            <input
+                                id="terminal-input"
+                                autocomplete="off"
+                                spellcheck="false"
+                                placeholder="type help"
+                            >
+                        </div>
+                    </div>
+                </section>
+
+                <section id="evidence-view" class="view hidden">
+                    <div class="view-header">
+                        <div>
+                            <p>CASE 03</p>
+                            <h2>Evidence Board</h2>
+                        </div>
+
+                        <span id="case-progress">0 / 8</span>
+                    </div>
+
+                    <div id="evidence-grid" class="evidence-grid"></div>
+                </section>
+
+                <section id="decision-view" class="view hidden">
+                    <div class="view-header">
+                        <div>
+                            <p>COMMUNICATIONS RESPONSE</p>
+                            <h2>Final Decision</h2>
+                        </div>
+                    </div>
+
+                    <div class="decision">
+                        <p>
+                            Communications integrity cannot be guaranteed.
+                            Decide which path should carry the incident evidence.
+                        </p>
+
+                        <p id="decision-summary"></p>
+
+                        <div class="decision-options">
+                            <button class="decision-button" data-choice="verified">
+                                <strong>USE VERIFIED LENA CHANNEL</strong><br><br>
+
+                                Route the case through the identity-confirmed
+                                communication channel.
+                            </button>
+
+                            <button class="decision-button" data-choice="silence">
+                                <strong>SHUT DOWN INTERNAL COMMUNICATIONS</strong><br><br>
+
+                                Disable messaging and voice routing until morning.
+                            </button>
+
+                            <button class="decision-button" data-choice="director">
+                                <strong>FOLLOW SECURITY DIRECTOR MESSAGE</strong><br><br>
+
+                                Upload evidence to ARCHIVE-NULL and terminate
+                                the investigation.
+                            </button>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+
+        <footer>
+            <span>NORTHSTAR SYSTEMS // COMMUNICATIONS NETWORK</span>
+            <span id="footer-status">Identity verification degraded.</span>
+        </footer>
+    </section>
+
+    <section id="ending-screen" class="hidden">
+        <div class="ending">
+            <p class="label">SHIFT 3 COMPLETE</p>
+
+            <h1 id="ending-title"></h1>
+
+            <p id="ending-description"></p>
+
+            <div class="ending-stats">
+                <div>
+                    <span>INFRASTRUCTURE</span>
+                    <strong id="ending-infra"></strong>
+                </div>
+
+                <div>
+                    <span>SECURITY</span>
+                    <strong id="ending-security"></strong>
+                </div>
+
+                <div>
+                    <span>IDENTITY</span>
+                    <strong id="ending-identity"></strong>
+                </div>
+
+                <div>
+                    <span>EVIDENCE</span>
+                    <strong id="ending-evidence"></strong>
+                </div>
+            </div>
+
+            <button class="primary-button" onclick="location.reload()">
+                REPLAY SHIFT 3
+            </button>
+        </div>
+    </section>
+
+    <script>
+        const previousEnding =
+            localStorage.getItem("aftershift_shift2_best") ||
+            "ENDING: INSIDE ACCESS";
+
+        document.getElementById("previous-ending").textContent =
+            previousEnding.replace("ENDING: ", "");
+
+        const state = {
+            infrastructure: 100,
+            security: 100,
+            identity: 42,
+            minutes: 3 * 60 + 12,
+            relayIsolated: false,
+            lenaVerified: false,
+            directorSpoofed: false,
+            decision: null
+        };
+
+        const foundEvidence = new Set();
+
+        const evidence = {
+            ghostExtension: {
+                title: "Ghost Extension",
+                description:
+                    "Extension 0000 is not assigned to any employee, room, device, or voice gateway."
+            },
+
+            syntheticVoice: {
+                title: "Synthetic Voice Artifact",
+                description:
+                    "CALL-0000 contains timing and spectral anomalies consistent with generated or reconstructed speech."
+            },
+
+            spoofedDirector: {
+                title: "Spoofed Director Message",
+                description:
+                    "The message attributed to Security Director Adrian Cole was issued after his authenticated session had already gone offline."
+            },
+
+            verifiedLena: {
+                title: "Verified Lena Channel",
+                description:
+                    "Lena Park's challenge phrase matches the emergency identity verification record stored outside the messaging system."
+            },
+
+            hiddenRelay: {
+                title: "Hidden Communications Relay",
+                description:
+                    "RELAY-09 is routing internal voice and message traffic despite having no approved communications owner."
+            },
+
+            injectedMessage: {
+                title: "Message Injection",
+                description:
+                    "The Security Director message entered the internal messaging system through RELAY-09 instead of MSG-HUB-02."
+            },
+
+            hijackedSession: {
+                title: "Director Session Replay",
+                description:
+                    "A stale authentication token belonging to Adrian Cole was replayed after his live session ended."
+            },
+
+            deadChannelOrigin: {
+                title: "Dead Channel Origin",
+                description:
+                    "CALL-0000, the spoofed message, and the replayed Director session all converge on RELAY-09."
+            }
+        };
+
+        const startButton = document.getElementById("start-button");
+        const startScreen = document.getElementById("start-screen");
+        const gameScreen = document.getElementById("game-screen");
+        const endingScreen = document.getElementById("ending-screen");
+        const terminalInput = document.getElementById("terminal-input");
+        const terminalOutput = document.getElementById("terminal-output");
+
+        startButton.addEventListener("click", startGame);
+
+        document.querySelectorAll(".nav").forEach(button => {
+            button.addEventListener("click", () => {
+                openView(button.dataset.view);
+
+                if (button.dataset.view === "terminal") {
+                    setTimeout(() => terminalInput.focus(), 100);
+                }
+            });
+        });
+
+        terminalInput.addEventListener("keydown", event => {
+            if (event.key === "Enter") {
+                const command = terminalInput.value.trim();
+
+                if (command) {
+                    runCommand(command);
+                }
+
+                terminalInput.value = "";
+            }
+        });
+
+        document.getElementById("metadata-button").addEventListener("click", () => {
+            discover("ghostExtension");
+
+            state.identity = clamp(state.identity + 6);
+
+            updateStats();
+        });
+
+        document.getElementById("voice-button").addEventListener("click", () => {
+            discover("syntheticVoice");
+
+            state.identity = clamp(state.identity + 5);
+
+            updateStats();
+        });
+
+        document.getElementById("director-message").addEventListener("click", () => {
+            terminalLine(
+                "Message inspection recommended: compare MSG-DIR-441",
+                "yellow"
+            );
+        });
+
+        document.getElementById("lena-message").addEventListener("click", () => {
+            terminalLine(
+                "Identity verification available: verify lena",
+                "blue"
+            );
+        });
+
+        document.querySelectorAll(".decision-button").forEach(button => {
+            button.addEventListener("click", () => {
+                state.decision = button.dataset.choice;
+                finishShift();
+            });
+        });
+
+        function startGame() {
+            startScreen.classList.add("hidden");
+            gameScreen.classList.remove("hidden");
+
+            terminalLine("NORTHSTAR COMMUNICATIONS SHELL", "green");
+            terminalLine("Shift 3 session initialized.", "blue");
+            terminalLine("");
+            terminalLine("WARNING: Identity services degraded.", "red");
+            terminalLine("WARNING: Security Director unavailable.", "red");
+            terminalLine("");
+            terminalLine('Type "help" for investigation commands.');
+
+            renderEvidence();
+            updateStats();
+            updateClock();
+        }
+
+        function openView(name) {
+            document.querySelectorAll(".view").forEach(view => {
+                view.classList.add("hidden");
+            });
+
+            const view = document.getElementById(`${name}-view`);
+
+            if (view) {
+                view.classList.remove("hidden");
+            }
+
+            document.querySelectorAll(".nav").forEach(button => {
+                button.classList.toggle(
+                    "active",
+                    button.dataset.view === name
+                );
+            });
+        }
+
+        function discover(key) {
+            if (!evidence[key] || foundEvidence.has(key)) {
+                return;
+            }
+
+            foundEvidence.add(key);
+
+            terminalLine(
+                `[EVIDENCE ADDED] ${evidence[key].title}`,
+                "green"
+            );
+
+            document.getElementById("footer-status").textContent =
+                `New evidence: ${evidence[key].title}`;
+
+            checkFinalCorrelation();
+            renderEvidence();
+            updateStats();
+        }
+
+        function checkFinalCorrelation() {
+            const required = [
+                "ghostExtension",
+                "syntheticVoice",
+                "spoofedDirector",
+                "verifiedLena",
+                "hiddenRelay",
+                "injectedMessage",
+                "hijackedSession"
+            ];
+
+            if (
+                required.every(item => foundEvidence.has(item)) &&
+                !foundEvidence.has("deadChannelOrigin")
+            ) {
+                foundEvidence.add("deadChannelOrigin");
+
+                terminalLine(
+                    "[CORRELATION COMPLETE] Dead Channel Origin identified.",
+                    "green"
+                );
+
+                terminalLine(
+                    "CALL-0000 + MSG-DIR-441 + replayed Director token -> RELAY-09",
+                    "purple"
+                );
+
+                unlockDecision();
+            }
+        }
+
+        function renderEvidence() {
+            const grid = document.getElementById("evidence-grid");
+            grid.innerHTML = "";
+
+            Object.entries(evidence).forEach(([key, item], index) => {
+                const found = foundEvidence.has(key);
+
+                const card = document.createElement("div");
+
+                card.className =
+                    `evidence ${found ? "found" : "locked"}`;
+
+                card.innerHTML = `
+                    <span>
+                        ${found ? "DISCOVERED" : "UNDISCOVERED"}
+                    </span>
+
+                    <h3>
+                        ${
+                            found
+                                ? item.title
+                                : `Evidence ${String(index + 1).padStart(2, "0")}`
+                        }
+                    </h3>
+
+                    <p>
+                        ${
+                            found
+                                ? item.description
+                                : "Further communications investigation required."
+                        }
+                    </p>
+                `;
+
+                grid.appendChild(card);
+            });
+
+            document.getElementById("evidence-count").textContent =
+                foundEvidence.size;
+
+            document.getElementById("evidence-stat").textContent =
+                `${foundEvidence.size} / 8`;
+
+            document.getElementById("case-progress").textContent =
+                `${foundEvidence.size} / 8`;
+
+            if (foundEvidence.size >= 6) {
+                unlockDecision();
+            }
+        }
+
+        function unlockDecision() {
+            document.getElementById("decision-nav").classList.remove("hidden");
+
+            document.getElementById("decision-summary").textContent =
+                `${foundEvidence.size} of 8 evidence items discovered. ` +
+                `RELAY-09 is ${state.relayIsolated ? "isolated" : "still active"}. ` +
+                `Lena Park identity is ${state.lenaVerified ? "verified" : "unverified"}.`;
+        }
+
+        function runCommand(raw) {
+            terminalLine(`aftershift> ${raw}`, "command");
+
+            const input = raw.trim();
+            const lower = input.toLowerCase();
+            const parts = input.split(/\s+/);
+
+            const command = parts[0].toLowerCase();
+            const argument = parts.slice(1).join(" ");
+
+            state.minutes += 2;
+            updateClock();
+
+            if (lower === "help") {
+                showHelp();
+                return;
+            }
+
+            if (lower === "status") {
+                showStatus();
+                return;
+            }
+
+            if (lower === "evidence") {
+                showEvidence();
+                return;
+            }
+
+            if (lower === "clear") {
+                terminalOutput.innerHTML = "";
+                return;
+            }
+
+            if (command === "trace") {
+                traceCommand(argument);
+                return;
+            }
+
+            if (command === "verify") {
+                verifyCommand(argument);
+                return;
+            }
+
+            if (command === "compare") {
+                compareCommand(argument);
+                return;
+            }
+
+            if (command === "session") {
+                sessionCommand(argument);
+                return;
+            }
+
+            if (command === "route") {
+                routeCommand(argument);
+                return;
+            }
+
+            if (command === "lookup") {
+                lookupCommand(argument);
+                return;
+            }
+
+            if (command === "isolate") {
+                isolateCommand(argument);
+                return;
+            }
+
+            if (command === "audio") {
+                audioCommand(argument);
+                return;
+            }
+
+            terminalLine("Unknown command. Type help.", "red");
+        }
+
+        function showHelp() {
+            terminalLine("SHIFT 3 COMMUNICATIONS COMMANDS", "green");
+            terminalLine("");
+            terminalLine("trace EXT-0000");
+            terminalLine("audio CALL-0000");
+            terminalLine("verify lena");
+            terminalLine("compare MSG-DIR-441");
+            terminalLine("session adrian.cole");
+            terminalLine("route MSG-DIR-441");
+            terminalLine("lookup RELAY-09");
+            terminalLine("isolate RELAY-09");
+            terminalLine("evidence");
+            terminalLine("status");
+            terminalLine("clear");
+        }
+
+        function showStatus() {
+            terminalLine("SHIFT 3 STATUS", "blue");
+            terminalLine(`Infrastructure: ${state.infrastructure}%`);
+            terminalLine(`Security: ${state.security}%`);
+            terminalLine(`Identity Confidence: ${state.identity}%`);
+            terminalLine(`Evidence: ${foundEvidence.size}/8`);
+
+            terminalLine(
+                `RELAY-09: ${state.relayIsolated ? "ISOLATED" : "ACTIVE"}`,
+                state.relayIsolated ? "green" : "red"
+            );
+
+            terminalLine(
+                `Lena Park: ${state.lenaVerified ? "VERIFIED" : "UNVERIFIED"}`,
+                state.lenaVerified ? "green" : "yellow"
+            );
+        }
+
+        function showEvidence() {
+            terminalLine("DISCOVERED EVIDENCE", "blue");
+
+            if (!foundEvidence.size) {
+                terminalLine("No evidence discovered.", "yellow");
+                return;
+            }
+
+            foundEvidence.forEach(key => {
+                terminalLine(`- ${evidence[key].title}`);
+            });
+        }
+
+        function traceCommand(argument) {
+            if (argument.toUpperCase() !== "EXT-0000") {
+                terminalLine("Usage: trace EXT-0000", "yellow");
+                return;
+            }
+
+            terminalLine("VOICE ROUTE TRACE", "blue");
+            terminalLine("EXT-0000");
+            terminalLine("Assigned User: NONE");
+            terminalLine("Assigned Room: NONE");
+            terminalLine("Voice Gateway Registration: NONE", "red");
+            terminalLine("Last Route: RELAY-09", "yellow");
+
+            discover("ghostExtension");
+            discover("hiddenRelay");
+
+            revealRelay();
+        }
+
+        function audioCommand(argument) {
+            if (argument.toUpperCase() !== "CALL-0000") {
+                terminalLine("Usage: audio CALL-0000", "yellow");
+                return;
+            }
+
+            terminalLine("VOICE ANALYSIS", "blue");
+            terminalLine("Sample: CALL-0000");
+            terminalLine("Duration: 8.2 seconds");
+            terminalLine("Breathing Pattern: NONE", "yellow");
+            terminalLine("Micro-pause Consistency: 99.8%", "red");
+            terminalLine("Spectral Reconstruction: DETECTED", "red");
+            terminalLine("Voice Authenticity: LOW");
+
+            discover("syntheticVoice");
+        }
+
+        function verifyCommand(argument) {
+            if (argument.toLowerCase() !== "lena") {
+                terminalLine("Usage: verify lena", "yellow");
+                return;
+            }
+
+            terminalLine("OUT-OF-BAND IDENTITY CHECK", "blue");
+            terminalLine("Employee: Lena Park");
+            terminalLine("Emergency Challenge Record: COBALT-SUN-14");
+            terminalLine("Message Challenge: COBALT-SUN-14");
+            terminalLine("MATCH: VERIFIED", "green");
+
+            state.lenaVerified = true;
+            state.identity = clamp(state.identity + 20);
+
+            discover("verifiedLena");
+
+            updateStats();
+        }
+
+        function compareCommand(argument) {
+            if (argument.toUpperCase() !== "MSG-DIR-441") {
+                terminalLine("Usage: compare MSG-DIR-441", "yellow");
+                return;
+            }
+
+            terminalLine("MESSAGE IDENTITY COMPARISON", "blue");
+            terminalLine("Claimed Sender: Adrian Cole");
+            terminalLine("Message Time: 03:14 AM");
+            terminalLine("Live Session Ended: 03:09 AM", "red");
+            terminalLine("Signature Chain: INVALID", "red");
+            terminalLine("Identity Confidence: 3%");
+
+            state.directorSpoofed = true;
+            state.identity = clamp(state.identity + 12);
+
+            discover("spoofedDirector");
+
+            updateStats();
+        }
+
+        function sessionCommand(argument) {
+            if (argument.toLowerCase() !== "adrian.cole") {
+                terminalLine("Usage: session adrian.cole", "yellow");
+                return;
+            }
+
+            terminalLine("SESSION HISTORY", "blue");
+            terminalLine("User: Adrian Cole");
+            terminalLine("Interactive Session: CLOSED 03:09 AM");
+            terminalLine("03:14 AM Token Reuse Detected", "red");
+            terminalLine("Token Age: STALE");
+            terminalLine("Origin: RELAY-09", "yellow");
+
+            discover("hijackedSession");
+            discover("hiddenRelay");
+
+            revealRelay();
+        }
+
+        function routeCommand(argument) {
+            if (argument.toUpperCase() !== "MSG-DIR-441") {
+                terminalLine("Usage: route MSG-DIR-441", "yellow");
+                return;
+            }
+
+            terminalLine("MESSAGE ROUTE", "blue");
+            terminalLine("Expected Route:");
+            terminalLine("Director -> MSG-HUB-02 -> Operator");
+            terminalLine("");
+            terminalLine("Actual Route:");
+            terminalLine("RELAY-09 -> MSG-HUB-02 -> Operator", "red");
+            terminalLine("Sender Injection Detected.", "red");
+
+            discover("injectedMessage");
+            discover("hiddenRelay");
+
+            revealRelay();
+        }
+
+        function lookupCommand(argument) {
+            if (argument.toUpperCase() !== "RELAY-09") {
+                terminalLine("Usage: lookup RELAY-09", "yellow");
+                return;
+            }
+
+            terminalLine("SERVICE LOOKUP", "blue");
+            terminalLine("Name: RELAY-09");
+            terminalLine("Owner: NONE", "red");
+            terminalLine("Change Record: NONE");
+            terminalLine("Approval Record: NONE");
+            terminalLine("First Seen: 94 days ago", "yellow");
+            terminalLine("Current State: ACTIVE", "red");
+
+            discover("hiddenRelay");
+
+            revealRelay();
+        }
+
+        function isolateCommand(argument) {
+            if (argument.toUpperCase() !== "RELAY-09") {
+                terminalLine("Usage: isolate RELAY-09", "yellow");
+                return;
+            }
+
+            if (state.relayIsolated) {
+                terminalLine("RELAY-09 already isolated.", "yellow");
+                return;
+            }
+
+            state.relayIsolated = true;
+
+            state.security = clamp(state.security + 12);
+            state.infrastructure = clamp(state.infrastructure - 3);
+
+            terminalLine("COMMUNICATIONS CONTROL", "blue");
+            terminalLine("RELAY-09 -> ISOLATED", "green");
+            terminalLine("Injected routing stopped.");
+            terminalLine("Evidence preserved.");
+
+            updateStats();
+            unlockDecision();
+        }
+
+        function revealRelay() {
+            const relay = document.getElementById("relay-node");
+
+            relay.classList.remove("hidden-node");
+        }
+
+        function updateStats() {
+            document.getElementById("infra-value").textContent =
+                `${state.infrastructure}%`;
+
+            document.getElementById("security-value").textContent =
+                `${state.security}%`;
+
+            document.getElementById("identity-value").textContent =
+                `${state.identity}%`;
+
+            document.getElementById("infra-bar").style.width =
+                `${state.infrastructure}%`;
+
+            document.getElementById("security-bar").style.width =
+                `${state.security}%`;
+
+            document.getElementById("identity-bar").style.width =
+                `${state.identity}%`;
+
+            setBar("infra-bar", state.infrastructure);
+            setBar("security-bar", state.security);
+            setBar("identity-bar", state.identity);
+
+            document.getElementById("evidence-stat").textContent =
+                `${foundEvidence.size} / 8`;
+        }
+
+        function setBar(id, value) {
+            const bar = document.getElementById(id);
+
+            if (value >= 70) {
+                bar.style.background = "var(--green)";
+            } else if (value >= 40) {
+                bar.style.background = "var(--yellow)";
+            } else {
+                bar.style.background = "var(--red)";
+            }
+        }
+
+        function updateClock() {
+            state.minutes %= 1440;
+
+            const hours = Math.floor(state.minutes / 60);
+            const minutes = state.minutes % 60;
+
+            const period = hours >= 12 ? "PM" : "AM";
+
+            let displayHour = hours % 12;
+
+            if (displayHour === 0) {
+                displayHour = 12;
+            }
+
+            document.getElementById("clock").textContent =
+                `${displayHour}:${String(minutes).padStart(2, "0")} ${period}`;
+        }
+
+        function terminalLine(text, type = "") {
+            const line = document.createElement("div");
+
+            line.className = `terminal-line ${type}`;
+            line.textContent = text;
+
+            terminalOutput.appendChild(line);
+            terminalOutput.scrollTop = terminalOutput.scrollHeight;
+        }
+
+        function finishShift() {
+            gameScreen.classList.add("hidden");
+            endingScreen.classList.remove("hidden");
+
+            const evidenceCount = foundEvidence.size;
+
+            let title;
+            let description;
+
+            if (
+                evidenceCount === 8 &&
+                state.relayIsolated &&
+                state.lenaVerified &&
+                state.decision === "verified" &&
+                state.security >= 70
+            ) {
+                title = "ENDING: DEAD CHANNEL";
+
+                description =
+                    "You proved the communications system itself had become part of the attack. " +
+                    "Extension 0000 was synthetic, the Security Director message was injected, " +
+                    "his stale session token had been replayed, and every false signal converged on RELAY-09. " +
+                    "You isolated the relay and moved the evidence through Lena Park's independently verified channel. " +
+                    "For the first time, the attacker lost the ability to speak as Northstar.";
+            } else if (
+                state.decision === "director"
+            ) {
+                title = "ENDING: FALSE DIRECTIVE";
+
+                description =
+                    "The evidence was uploaded to ARCHIVE-NULL as instructed. " +
+                    "At 03:41 AM the destination disappeared from the network. " +
+                    "The Security Director never sent the message.";
+            } else if (
+                state.decision === "silence"
+            ) {
+                title = "ENDING: SILENCE";
+
+                description =
+                    "You shut down the company's internal communications network. " +
+                    "The spoofing stopped, but Northstar lost voice and messaging services across the building. " +
+                    "The attacker went quiet before the source could be fully identified.";
+            } else if (
+                state.lenaVerified &&
+                state.decision === "verified" &&
+                evidenceCount >= 5
+            ) {
+                title = "ENDING: TRUST ANCHOR";
+
+                description =
+                    "You found one identity you could verify independently and used it to move the case forward. " +
+                    "The communications compromise remains partially unresolved, but the evidence survived.";
+            } else {
+                title = "ENDING: NO SIGNAL";
+
+                description =
+                    "By sunrise, you could no longer determine which messages were genuine. " +
+                    "The call from extension 0000 was never traced, and RELAY-09 disappeared from active routing.";
+            }
+
+            localStorage.setItem(
+                "aftershift_shift3_best",
+                title
+            );
+
+            document.getElementById("ending-title").textContent = title;
+            document.getElementById("ending-description").textContent =
+                description;
+
+            document.getElementById("ending-infra").textContent =
+                `${state.infrastructure}%`;
+
+            document.getElementById("ending-security").textContent =
+                `${state.security}%`;
+
+            document.getElementById("ending-identity").textContent =
+                `${state.identity}%`;
+
+            document.getElementById("ending-evidence").textContent =
+                `${evidenceCount} / 8`;
+        }
+
+        function clamp(value) {
+            return Math.max(0, Math.min(100, value));
+        }
+    </script>
+</body>
+</html>
