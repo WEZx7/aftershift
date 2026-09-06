@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AFTERSHIFT</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="scanlines"></div>
+
+    <section id="start-screen" class="screen">
+        <div class="boot-box">
+            <p class="boot-label">NORTHSTAR SYSTEMS // INTERNAL ACCESS</p>
+
+            <h1>AFTERSHIFT</h1>
+
+            <p class="tagline">
+                Nobody calls IT at 2AM for something normal.
+            </p>
+
+            <div class="boot-status">
+                <p>> IT Operations Console ........ READY</p>
+                <p>> Security Monitoring .......... READY</p>
+                <p>> Asset Database ............... READY</p>
+                <p>> Night Operator ................ CONNECTED</p>
+            </div>
+
+            <button id="start-button">START NIGHT SHIFT</button>
+
+            <p class="version">BUILD 0.1 // INTERNAL USE ONLY</p>
+        </div>
+    </section>
+
+    <section id="game-screen" class="screen hidden">
+        <header>
+            <div>
+                <span class="logo">AFTERSHIFT</span>
+                <span class="subtitle">IT OPERATIONS CENTER</span>
+            </div>
+
+            <div class="header-right">
+                <span id="shift-status">SHIFT ACTIVE</span>
+                <span id="clock">11:47 PM</span>
+            </div>
+        </header>
+
+        <div class="layout">
+            <aside>
+                <p class="section-label">WORKSTATION</p>
+
+                <button class="nav-button active" data-view="tickets">
+                    Tickets
+                    <span id="ticket-count">4</span>
+                </button>
+
+                <button class="nav-button" data-view="network">
+                    Network
+                </button>
+
+                <button class="nav-button" data-view="logs">
+                    Event Logs
+                </button>
+
+                <button class="nav-button" data-view="employees">
+                    Employees
+                </button>
+
+                <div class="operator-card">
+                    <p class="section-label">OPERATOR</p>
+                    <strong>Night IT Technician</strong>
+                    <span>Clearance: Level 2</span>
+                </div>
+            </aside>
+
+            <main>
+                <section class="stats">
+                    <div class="stat-card">
+                        <span>SYSTEM HEALTH</span>
+                        <strong id="health-value">100%</strong>
+                        <div class="meter">
+                            <div id="health-bar" class="meter-fill"></div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <span>SECURITY</span>
+                        <strong id="security-value">100%</strong>
+                        <div class="meter">
+                            <div id="security-bar" class="meter-fill"></div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <span>EMPLOYEE TRUST</span>
+                        <strong id="trust-value">70%</strong>
+                        <div class="meter">
+                            <div id="trust-bar" class="meter-fill"></div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <span>OPEN TICKETS</span>
+                        <strong id="open-ticket-value">4</strong>
+                        <p id="ticket-status-text">Awaiting response</p>
+                    </div>
+                </section>
+
+                <section id="tickets-view" class="view">
+                    <div class="panel-heading">
+                        <div>
+                            <p class="section-label">HELP DESK</p>
+                            <h2>Incoming Ticket</h2>
+                        </div>
+
+                        <span id="severity-badge" class="severity low">LOW</span>
+                    </div>
+
+                    <div class="ticket">
+                        <div class="ticket-top">
+                            <span id="ticket-id">TICKET #1842</span>
+                            <span id="ticket-time">11:49 PM</span>
+                        </div>
+
+                        <h3 id="ticket-title">Computer suddenly became very slow</h3>
+
+                        <blockquote id="ticket-message">
+                            "Everything froze about ten minutes ago. I didn't install anything."
+                        </blockquote>
+
+                        <div class="ticket-info">
+                            <div>
+                                <span>EMPLOYEE</span>
+                                <strong id="employee-name">Sarah Mitchell</strong>
+                            </div>
+
+                            <div>
+                                <span>DEPARTMENT</span>
+                                <strong id="department">Finance</strong>
+                            </div>
+
+                            <div>
+                                <span>DEVICE</span>
+                                <strong id="device">FIN-LT-014</strong>
+                            </div>
+
+                            <div>
+                                <span>STATUS</span>
+                                <strong id="device-status">ONLINE</strong>
+                            </div>
+                        </div>
+
+                        <div class="risk-box">
+                            <div>
+                                <span>INCIDENT RISK</span>
+                                <strong id="risk-score">12 / 100</strong>
+                            </div>
+
+                            <div class="risk-meter">
+                                <div id="risk-bar"></div>
+                            </div>
+                        </div>
+
+                        <div id="evidence-box" class="evidence-box">
+                            <p class="section-label">KNOWN EVIDENCE</p>
+                            <ul id="evidence-list">
+                                <li>User reports severe system slowdown</li>
+                            </ul>
+                        </div>
+
+                        <p class="decision-label">SELECT RESPONSE</p>
+
+                        <div id="choices" class="choices"></div>
+
+                        <div id="result-box" class="result-box hidden">
+                            <span id="result-label">ACTION RESULT</span>
+                            <p id="result-text"></p>
+                            <button id="continue-button">CONTINUE</button>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="network-view" class="view hidden">
+                    <div class="panel-heading">
+                        <div>
+                            <p class="section-label">INFRASTRUCTURE</p>
+                            <h2>Company Network</h2>
+                        </div>
+
+                        <span class="live-dot">LIVE</span>
+                    </div>
+
+                    <div class="network-grid">
+                        <div class="device-card online">
+                            <span class="device-dot"></span>
+                            <strong>CORE-SRV-01</strong>
+                            <p>Domain Controller</p>
+                            <small>ONLINE</small>
+                        </div>
+
+                        <div class="device-card online">
+                            <span class="device-dot"></span>
+                            <strong>FILE-SRV-02</strong>
+                            <p>File Server</p>
+                            <small>ONLINE</small>
+                        </div>
+
+                        <div class="device-card warning">
+                            <span class="device-dot"></span>
+                            <strong>FIN-LT-014</strong>
+                            <p>Finance Laptop</p>
+                            <small>WARNING</small>
+                        </div>
+
+                        <div class="device-card online">
+                            <span class="device-dot"></span>
+                            <strong>HR-LT-011</strong>
+                            <p>HR Laptop</p>
+                            <small>ONLINE</small>
+                        </div>
+
+                        <div class="device-card unknown">
+                            <span class="device-dot"></span>
+                            <strong>UNKNOWN-7F2</strong>
+                            <p>Unidentified Device</p>
+                            <small>UNVERIFIED</small>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="logs-view" class="view hidden">
+                    <div class="panel-heading">
+                        <div>
+                            <p class="section-label">MONITORING</p>
+                            <h2>Event Logs</h2>
+                        </div>
+                    </div>
+
+                    <div id="event-log" class="event-log"></div>
+                </section>
+
+                <section id="employees-view" class="view hidden">
+                    <div class="panel-heading">
+                        <div>
+                            <p class="section-label">DIRECTORY</p>
+                            <h2>Employees</h2>
+                        </div>
+                    </div>
+
+                    <div class="employee-list">
+                        <div class="employee">
+                            <strong>Sarah Mitchell</strong>
+                            <span>Finance</span>
+                            <small>FIN-LT-014</small>
+                        </div>
+
+                        <div class="employee">
+                            <strong>Daniel Reed</strong>
+                            <span>Human Resources</span>
+                            <small>HR-LT-011</small>
+                        </div>
+
+                        <div class="employee">
+                            <strong>Marcus Hale</strong>
+                            <span>Operations</span>
+                            <small>OPS-PC-021</small>
+                        </div>
+
+                        <div class="employee suspicious">
+                            <strong>UNKNOWN USER</strong>
+                            <span>Not found in directory</span>
+                            <small>UNKNOWN-7F2</small>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+
+        <footer>
+            <span>NORTHSTAR SYSTEMS // OPERATIONS NETWORK</span>
+            <span id="footer-message">No critical incidents detected.</span>
+        </footer>
+    </section>
+
+    <section id="ending-screen" class="screen hidden">
+        <div class="ending-box">
+            <p class="section-label">SHIFT COMPLETE</p>
+            <h1 id="ending-title">SHIFT REPORT</h1>
+            <p id="ending-description"></p>
+
+            <div class="ending-stats">
+                <div>
+                    <span>System Health</span>
+                    <strong id="ending-health"></strong>
+                </div>
+
+                <div>
+                    <span>Security</span>
+                    <strong id="ending-security"></strong>
+                </div>
+
+                <div>
+                    <span>Employee Trust</span>
+                    <strong id="ending-trust"></strong>
+                </div>
+            </div>
+
+            <button onclick="location.reload()">START ANOTHER SHIFT</button>
+        </div>
+    </section>
+
+    <script src="script.js"></script>
+</body>
+</html>
