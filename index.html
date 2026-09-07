@@ -4,343 +4,1127 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AFTERSHIFT</title>
-    <link rel="stylesheet" href="style.css">
+
+    <style>
+        :root {
+            --bg: #05090a;
+            --panel: #0a1011;
+            --panel2: #0e1516;
+            --border: #243131;
+            --text: #d8dfdc;
+            --muted: #788681;
+            --green: #66efb2;
+            --blue: #6fd8ff;
+            --yellow: #ecc66c;
+            --red: #ff6b6b;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: var(--bg);
+            color: var(--text);
+            font-family: "Courier New", monospace;
+        }
+
+        button {
+            font: inherit;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .scanlines {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 999;
+            opacity: 0.045;
+            background: repeating-linear-gradient(
+                to bottom,
+                transparent 0,
+                transparent 2px,
+                white 3px,
+                transparent 4px
+            );
+        }
+
+        .shell {
+            width: min(1180px, calc(100% - 40px));
+            margin: auto;
+            padding: 70px 0;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 25px;
+            margin-bottom: 35px;
+        }
+
+        .eyebrow {
+            color: var(--green);
+            font-size: 10px;
+            letter-spacing: 3px;
+        }
+
+        h1 {
+            font-size: clamp(58px, 10vw, 110px);
+            letter-spacing: -6px;
+            margin: 8px 0 0;
+            line-height: 0.9;
+        }
+
+        .subtitle {
+            color: var(--muted);
+            margin-top: 18px;
+            font-size: 13px;
+        }
+
+        .version {
+            color: #46524e;
+            font-size: 9px;
+            text-align: right;
+            line-height: 1.7;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 20px;
+        }
+
+        .panel {
+            border: 1px solid var(--border);
+            background: var(--panel);
+        }
+
+        .panel-header {
+            padding: 18px 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .panel-header span {
+            color: var(--green);
+            font-size: 9px;
+            letter-spacing: 2px;
+        }
+
+        .panel-header h2 {
+            margin: 7px 0 0;
+            font-size: 21px;
+        }
+
+        .menu {
+            padding: 20px;
+            display: grid;
+            gap: 10px;
+        }
+
+        .menu-button {
+            width: 100%;
+            border: 1px solid var(--border);
+            background: #081011;
+            color: var(--text);
+            cursor: pointer;
+            padding: 18px;
+            text-align: left;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: 0.18s;
+        }
+
+        .menu-button:hover:not(:disabled) {
+            border-color: var(--green);
+            color: var(--green);
+            transform: translateX(4px);
+        }
+
+        .menu-button.primary {
+            background: var(--green);
+            color: #04100c;
+            border-color: var(--green);
+            font-weight: bold;
+        }
+
+        .menu-button.primary:hover:not(:disabled) {
+            background: transparent;
+            color: var(--green);
+        }
+
+        .menu-button span {
+            color: var(--muted);
+            font-size: 9px;
+        }
+
+        .menu-button.primary span {
+            color: inherit;
+        }
+
+        .menu-button:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+
+        .progress {
+            padding: 20px;
+        }
+
+        .chapter-mini {
+            display: grid;
+            grid-template-columns: 50px 1fr auto;
+            gap: 13px;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            padding: 16px 0;
+        }
+
+        .chapter-mini:last-child {
+            border-bottom: 0;
+        }
+
+        .chapter-number {
+            color: var(--green);
+            font-size: 10px;
+        }
+
+        .chapter-mini strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .chapter-mini small {
+            color: var(--muted);
+            font-size: 9px;
+        }
+
+        .status {
+            font-size: 9px;
+            padding: 5px 8px;
+            border: 1px solid var(--border);
+        }
+
+        .status.complete {
+            color: var(--green);
+            border-color: rgba(102, 239, 178, 0.4);
+        }
+
+        .status.current {
+            color: var(--yellow);
+            border-color: rgba(236, 198, 108, 0.4);
+        }
+
+        .status.locked {
+            color: var(--muted);
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(2, 5, 6, 0.92);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 25px;
+        }
+
+        .modal-box {
+            width: min(950px, 100%);
+            max-height: 88vh;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+            background: #070c0d;
+        }
+
+        .modal-header {
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            background: #070c0d;
+            padding: 20px 22px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header p {
+            color: var(--green);
+            margin: 0 0 5px;
+            font-size: 9px;
+            letter-spacing: 2px;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+        }
+
+        .close-button {
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text);
+            padding: 9px 12px;
+            cursor: pointer;
+        }
+
+        .close-button:hover {
+            border-color: var(--red);
+            color: var(--red);
+        }
+
+        .modal-content {
+            padding: 22px;
+        }
+
+        .chapter-card {
+            border: 1px solid var(--border);
+            padding: 20px;
+            margin-bottom: 12px;
+            background: var(--panel);
+        }
+
+        .chapter-card.locked {
+            opacity: 0.4;
+        }
+
+        .chapter-card-top {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            align-items: flex-start;
+        }
+
+        .chapter-card .chapter-label {
+            color: var(--green);
+            font-size: 9px;
+            letter-spacing: 2px;
+        }
+
+        .chapter-card h3 {
+            margin: 8px 0;
+            font-size: 22px;
+        }
+
+        .chapter-card p {
+            color: var(--muted);
+            font-size: 11px;
+            line-height: 1.7;
+        }
+
+        .chapter-action {
+            border: 1px solid var(--green);
+            background: transparent;
+            color: var(--green);
+            padding: 10px 14px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .chapter-action:hover {
+            background: var(--green);
+            color: #04100c;
+        }
+
+        .chapter-action:disabled {
+            border-color: var(--border);
+            color: var(--muted);
+            cursor: not-allowed;
+        }
+
+        .archive-record {
+            border-left: 2px solid var(--green);
+            padding: 17px 20px;
+            background: var(--panel);
+            margin-bottom: 14px;
+        }
+
+        .archive-record.locked {
+            border-left-color: var(--border);
+            opacity: 0.35;
+        }
+
+        .archive-record span {
+            color: var(--green);
+            font-size: 9px;
+            letter-spacing: 1px;
+        }
+
+        .archive-record h3 {
+            margin: 9px 0;
+        }
+
+        .archive-record p {
+            color: var(--muted);
+            font-size: 11px;
+            line-height: 1.8;
+        }
+
+        .ending-tag {
+            display: inline-block;
+            color: var(--yellow);
+            border: 1px solid rgba(236, 198, 108, 0.35);
+            padding: 6px 9px;
+            margin-top: 5px;
+            font-size: 9px;
+        }
+
+        .manual-section {
+            border-bottom: 1px solid var(--border);
+            padding: 5px 0 22px;
+            margin-bottom: 22px;
+        }
+
+        .manual-section:last-child {
+            border-bottom: 0;
+        }
+
+        .manual-section h3 {
+            color: var(--green);
+        }
+
+        .manual-section p,
+        .manual-section li {
+            color: var(--muted);
+            font-size: 11px;
+            line-height: 1.9;
+        }
+
+        .command {
+            display: grid;
+            grid-template-columns: 180px 1fr;
+            border-bottom: 1px solid #172020;
+            padding: 10px 0;
+            font-size: 11px;
+        }
+
+        .command code {
+            color: var(--blue);
+        }
+
+        .command span {
+            color: var(--muted);
+        }
+
+        .legend {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .legend div {
+            border: 1px solid var(--border);
+            padding: 14px;
+            font-size: 10px;
+        }
+
+        .legend .green {
+            color: var(--green);
+        }
+
+        .legend .yellow {
+            color: var(--yellow);
+        }
+
+        .legend .red {
+            color: var(--red);
+        }
+
+        .danger-zone {
+            margin-top: 25px;
+            border: 1px solid rgba(255, 107, 107, 0.35);
+            padding: 18px;
+        }
+
+        .danger-zone strong {
+            color: var(--red);
+        }
+
+        .danger-button {
+            margin-top: 12px;
+            border: 1px solid var(--red);
+            background: transparent;
+            color: var(--red);
+            padding: 10px 14px;
+            cursor: pointer;
+        }
+
+        .danger-button:hover {
+            background: var(--red);
+            color: #100303;
+        }
+
+        footer {
+            margin-top: 25px;
+            border-top: 1px solid var(--border);
+            padding-top: 18px;
+            display: flex;
+            justify-content: space-between;
+            color: #46534f;
+            font-size: 9px;
+        }
+
+        @media (max-width: 800px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+
+            header {
+                align-items: flex-start;
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .version {
+                text-align: left;
+            }
+        }
+
+        @media (max-width: 550px) {
+            .shell {
+                width: min(100% - 24px, 1180px);
+                padding: 35px 0;
+            }
+
+            h1 {
+                letter-spacing: -4px;
+            }
+
+            .chapter-card-top {
+                flex-direction: column;
+            }
+
+            .chapter-action {
+                width: 100%;
+            }
+
+            .command {
+                grid-template-columns: 1fr;
+                gap: 5px;
+            }
+
+            .legend {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 
 <body>
     <div class="scanlines"></div>
 
-    <section id="start-screen" class="screen">
-        <div class="boot-box">
-            <p class="boot-label">NORTHSTAR SYSTEMS // INTERNAL ACCESS</p>
-            <h1>AFTERSHIFT</h1>
-
-            <p class="tagline">
-                Nobody calls IT at 2AM for something normal.
-            </p>
-
-            <div class="boot-status">
-                <p>> IT Operations Console ........ READY</p>
-                <p>> Security Monitoring .......... READY</p>
-                <p>> Asset Database ............... READY</p>
-                <p>> Investigation Shell .......... READY</p>
-                <p>> Night Operator ................ CONNECTED</p>
-            </div>
-
-            <button id="start-button">START NIGHT SHIFT</button>
-
-            <p class="version">BUILD 0.2 // INTERNAL USE ONLY</p>
-        </div>
-    </section>
-
-    <section id="game-screen" class="screen hidden">
+    <div class="shell">
         <header>
             <div>
-                <span class="logo">AFTERSHIFT</span>
-                <span class="subtitle">IT OPERATIONS CENTER</span>
+                <span class="eyebrow">
+                    NORTHSTAR SYSTEMS // NIGHT OPERATIONS
+                </span>
+
+                <h1>AFTERSHIFT</h1>
+
+                <p class="subtitle">
+                    Nobody calls IT at 2AM for something normal.
+                </p>
             </div>
 
-            <div class="header-right">
-                <span id="shift-status">SHIFT ACTIVE</span>
-                <span id="clock">11:47 PM</span>
+            <div class="version">
+                CAMPAIGN BUILD 0.6<br>
+                OPERATOR PROFILE: LOCAL<br>
+                SAVE SYSTEM: ACTIVE
             </div>
         </header>
 
-        <div class="layout">
-            <aside>
-                <p class="section-label">WORKSTATION</p>
-
-                <button class="nav-button active" data-view="tickets">
-                    Tickets
-                    <span id="ticket-count">4</span>
-                </button>
-
-                <button class="nav-button" data-view="network">
-                    Network
-                </button>
-
-                <button class="nav-button" data-view="logs">
-                    Event Logs
-                </button>
-
-                <button class="nav-button" data-view="employees">
-                    Employees
-                </button>
-
-                <button class="nav-button terminal-nav" data-view="terminal">
-                    Terminal
-                    <span>NEW</span>
-                </button>
-
-                <button class="nav-button" data-view="evidence">
-                    Evidence
-                    <span id="evidence-count">0</span>
-                </button>
-
-                <div class="operator-card">
-                    <p class="section-label">OPERATOR</p>
-                    <strong>Night IT Technician</strong>
-                    <span>Clearance: Level 2</span>
+        <div class="main-grid">
+            <section class="panel">
+                <div class="panel-header">
+                    <span>CAMPAIGN</span>
+                    <h2>Night Operations</h2>
                 </div>
-            </aside>
 
-            <main>
-                <section class="stats">
-                    <div class="stat-card">
-                        <span>SYSTEM HEALTH</span>
-                        <strong id="health-value">100%</strong>
-                        <div class="meter">
-                            <div id="health-bar" class="meter-fill"></div>
-                        </div>
-                    </div>
+                <div class="menu">
+                    <button id="continue-button" class="menu-button primary">
+                        CONTINUE CAMPAIGN
+                        <span id="continue-label">SHIFT 1</span>
+                    </button>
 
-                    <div class="stat-card">
-                        <span>SECURITY</span>
-                        <strong id="security-value">100%</strong>
-                        <div class="meter">
-                            <div id="security-bar" class="meter-fill"></div>
-                        </div>
-                    </div>
+                    <button id="new-game-button" class="menu-button">
+                        NEW GAME
+                        <span>RESET PROGRESS</span>
+                    </button>
 
-                    <div class="stat-card">
-                        <span>EMPLOYEE TRUST</span>
-                        <strong id="trust-value">70%</strong>
-                        <div class="meter">
-                            <div id="trust-bar" class="meter-fill"></div>
-                        </div>
-                    </div>
+                    <button id="chapter-select-button" class="menu-button">
+                        CHAPTER SELECT
+                        <span>REPLAY CASES</span>
+                    </button>
 
-                    <div class="stat-card">
-                        <span>OPEN TICKETS</span>
-                        <strong id="open-ticket-value">4</strong>
-                        <p id="ticket-status-text">Awaiting response</p>
-                    </div>
-                </section>
+                    <button id="archive-button" class="menu-button">
+                        CASE ARCHIVE
+                        <span>INCIDENT RECORDS</span>
+                    </button>
 
-                <section id="tickets-view" class="view">
-                    <div class="panel-heading">
-                        <div>
-                            <p class="section-label">HELP DESK</p>
-                            <h2>Incoming Ticket</h2>
-                        </div>
+                    <button id="manual-button" class="menu-button">
+                        OPERATOR MANUAL
+                        <span>HELP / CONTROLS</span>
+                    </button>
+                </div>
+            </section>
 
-                        <span id="severity-badge" class="severity low">LOW</span>
-                    </div>
+            <section class="panel">
+                <div class="panel-header">
+                    <span>OPERATOR RECORD</span>
+                    <h2>Campaign Progress</h2>
+                </div>
 
-                    <div class="ticket">
-                        <div class="ticket-top">
-                            <span id="ticket-id">TICKET #1842</span>
-                            <span id="ticket-time">11:49 PM</span>
-                        </div>
-
-                        <h3 id="ticket-title">Computer suddenly became very slow</h3>
-
-                        <blockquote id="ticket-message">
-                            "Everything froze about ten minutes ago. I didn't install anything."
-                        </blockquote>
-
-                        <div class="ticket-info">
-                            <div>
-                                <span>EMPLOYEE</span>
-                                <strong id="employee-name">Sarah Mitchell</strong>
-                            </div>
-
-                            <div>
-                                <span>DEPARTMENT</span>
-                                <strong id="department">Finance</strong>
-                            </div>
-
-                            <div>
-                                <span>DEVICE</span>
-                                <strong id="device">FIN-LT-014</strong>
-                            </div>
-
-                            <div>
-                                <span>STATUS</span>
-                                <strong id="device-status">ONLINE</strong>
-                            </div>
-                        </div>
-
-                        <div class="risk-box">
-                            <div>
-                                <span>INCIDENT RISK</span>
-                                <strong id="risk-score">12 / 100</strong>
-                            </div>
-
-                            <div class="risk-meter">
-                                <div id="risk-bar"></div>
-                            </div>
-                        </div>
-
-                        <div class="evidence-box">
-                            <p class="section-label">KNOWN EVIDENCE</p>
-                            <ul id="ticket-evidence-list"></ul>
-                        </div>
-
-                        <div class="investigation-tip">
-                            <strong>INVESTIGATION TIP</strong>
-                            <span id="investigation-tip-text">
-                                Open Terminal to investigate beyond the information in this ticket.
-                            </span>
-                        </div>
-
-                        <p class="decision-label">SELECT RESPONSE</p>
-
-                        <div id="choices" class="choices"></div>
-
-                        <div id="result-box" class="result-box hidden">
-                            <span id="result-label">ACTION RESULT</span>
-                            <p id="result-text"></p>
-                            <button id="continue-button">CONTINUE</button>
-                        </div>
-                    </div>
-                </section>
-
-                <section id="network-view" class="view hidden">
-                    <div class="panel-heading">
-                        <div>
-                            <p class="section-label">INFRASTRUCTURE</p>
-                            <h2>Company Network</h2>
-                        </div>
-
-                        <span class="live-dot">LIVE</span>
-                    </div>
-
-                    <div id="network-grid" class="network-grid"></div>
-                </section>
-
-                <section id="logs-view" class="view hidden">
-                    <div class="panel-heading">
-                        <div>
-                            <p class="section-label">MONITORING</p>
-                            <h2>Event Logs</h2>
-                        </div>
-                    </div>
-
-                    <div id="event-log" class="event-log"></div>
-                </section>
-
-                <section id="employees-view" class="view hidden">
-                    <div class="panel-heading">
-                        <div>
-                            <p class="section-label">DIRECTORY</p>
-                            <h2>Employees</h2>
-                        </div>
-                    </div>
-
-                    <div class="employee-list">
-                        <div class="employee">
-                            <strong>Sarah Mitchell</strong>
-                            <span>Finance</span>
-                            <small>FIN-LT-014</small>
-                        </div>
-
-                        <div class="employee">
-                            <strong>Daniel Reed</strong>
-                            <span>Human Resources</span>
-                            <small>HR-LT-011</small>
-                        </div>
-
-                        <div class="employee">
-                            <strong>Marcus Hale</strong>
-                            <span>Operations</span>
-                            <small>OPS-PC-021</small>
-                        </div>
-
-                        <div class="employee suspicious">
-                            <strong>UNKNOWN USER</strong>
-                            <span>Not found in directory</span>
-                            <small>UNKNOWN-7F2</small>
-                        </div>
-                    </div>
-                </section>
-
-                <section id="terminal-view" class="view hidden">
-                    <div class="panel-heading">
-                        <div>
-                            <p class="section-label">NORTHSTAR SECURE SHELL</p>
-                            <h2>Investigation Terminal</h2>
-                        </div>
-
-                        <span class="terminal-status">SESSION ACTIVE</span>
-                    </div>
-
-                    <div class="terminal-window">
-                        <div id="terminal-output" class="terminal-output"></div>
-
-                        <div class="terminal-input-row">
-                            <span>aftershift&gt;</span>
-                            <input
-                                id="terminal-input"
-                                type="text"
-                                autocomplete="off"
-                                spellcheck="false"
-                                placeholder="type help"
-                            >
-                        </div>
-                    </div>
-                </section>
-
-                <section id="evidence-view" class="view hidden">
-                    <div class="panel-heading">
-                        <div>
-                            <p class="section-label">CASE FILE</p>
-                            <h2>Evidence Board</h2>
-                        </div>
-
-                        <span id="case-progress">0 / 8 DISCOVERED</span>
-                    </div>
-
-                    <div class="case-summary">
-                        <p>
-                            Several incidents may be connected. Discover evidence through tickets,
-                            logs, network data, and the investigation terminal.
-                        </p>
-                    </div>
-
-                    <div id="evidence-board" class="evidence-board"></div>
-                </section>
-            </main>
+                <div id="progress-list" class="progress"></div>
+            </section>
         </div>
 
         <footer>
-            <span>NORTHSTAR SYSTEMS // OPERATIONS NETWORK</span>
-            <span id="footer-message">No critical incidents detected.</span>
+            <span>NORTHSTAR SYSTEMS // INTERNAL USE ONLY</span>
+            <span>PROGRESS SAVED LOCALLY IN THIS BROWSER</span>
         </footer>
-    </section>
+    </div>
 
-    <section id="ending-screen" class="screen hidden">
-        <div class="ending-box">
-            <p class="section-label">SHIFT COMPLETE</p>
-            <h1 id="ending-title">SHIFT REPORT</h1>
-            <p id="ending-description"></p>
-
-            <div class="ending-stats">
+    <div id="chapter-modal" class="modal hidden">
+        <div class="modal-box">
+            <div class="modal-header">
                 <div>
-                    <span>System Health</span>
-                    <strong id="ending-health"></strong>
+                    <p>CAMPAIGN</p>
+                    <h2>Chapter Select</h2>
                 </div>
 
-                <div>
-                    <span>Security</span>
-                    <strong id="ending-security"></strong>
-                </div>
-
-                <div>
-                    <span>Employee Trust</span>
-                    <strong id="ending-trust"></strong>
-                </div>
+                <button class="close-button" data-close="chapter-modal">
+                    CLOSE
+                </button>
             </div>
 
-            <div class="ending-evidence">
-                <span>EVIDENCE DISCOVERED</span>
-                <strong id="ending-evidence-count"></strong>
-            </div>
-
-            <button onclick="window.location.href='shift2.html'">CONTINUE TO SHIFT 2</button>
+            <div id="chapter-list" class="modal-content"></div>
         </div>
-    </section>
+    </div>
 
-    <script src="script.js"></script>
+    <div id="archive-modal" class="modal hidden">
+        <div class="modal-box">
+            <div class="modal-header">
+                <div>
+                    <p>NORTHSTAR RECORDS</p>
+                    <h2>Case Archive</h2>
+                </div>
+
+                <button class="close-button" data-close="archive-modal">
+                    CLOSE
+                </button>
+            </div>
+
+            <div id="archive-list" class="modal-content"></div>
+        </div>
+    </div>
+
+    <div id="manual-modal" class="modal hidden">
+        <div class="modal-box">
+            <div class="modal-header">
+                <div>
+                    <p>OPERATOR REFERENCE</p>
+                    <h2>Operator Manual</h2>
+                </div>
+
+                <button class="close-button" data-close="manual-modal">
+                    CLOSE
+                </button>
+            </div>
+
+            <div class="modal-content">
+                <section class="manual-section">
+                    <h3>How AFTERSHIFT Works</h3>
+
+                    <p>
+                        Investigate incidents instead of blindly choosing answers.
+                        Tickets, messages, device records and alerts may only reveal
+                        part of the story.
+                    </p>
+
+                    <ol>
+                        <li>Read the incident carefully.</li>
+                        <li>Inspect related systems and records.</li>
+                        <li>Use the Terminal to uncover hidden evidence.</li>
+                        <li>Review your Evidence Board.</li>
+                        <li>Contain threats when enough information is available.</li>
+                        <li>Make the final decision based on verified evidence.</li>
+                    </ol>
+                </section>
+
+                <section class="manual-section">
+                    <h3>Terminal Basics</h3>
+
+                    <p>
+                        Every chapter contains its own investigation commands.
+                        Type <strong>help</strong> inside the Terminal to see
+                        commands available during that shift.
+                    </p>
+
+                    <div class="command">
+                        <code>help</code>
+                        <span>Show commands available in the current chapter.</span>
+                    </div>
+
+                    <div class="command">
+                        <code>status</code>
+                        <span>Review current system and investigation status.</span>
+                    </div>
+
+                    <div class="command">
+                        <code>evidence</code>
+                        <span>List evidence discovered during the current case.</span>
+                    </div>
+
+                    <div class="command">
+                        <code>clear</code>
+                        <span>Clear the investigation terminal.</span>
+                    </div>
+                </section>
+
+                <section class="manual-section">
+                    <h3>Signal Colors</h3>
+
+                    <div class="legend">
+                        <div class="green">
+                            GREEN<br><br>
+                            Verified, healthy or successfully contained.
+                        </div>
+
+                        <div class="yellow">
+                            YELLOW<br><br>
+                            Suspicious, incomplete or requires investigation.
+                        </div>
+
+                        <div class="red">
+                            RED<br><br>
+                            Critical, malicious or identity cannot be trusted.
+                        </div>
+                    </div>
+                </section>
+
+                <section class="manual-section">
+                    <h3>Evidence</h3>
+
+                    <p>
+                        Evidence may be discovered through multiple paths.
+                        A Terminal command, message inspection or incident decision
+                        can reveal the same clue.
+                    </p>
+
+                    <p>
+                        The strongest endings usually require more than high system
+                        statistics. You need the correct evidence and the correct
+                        final decision.
+                    </p>
+                </section>
+
+                <section class="manual-section">
+                    <h3>Mobile Controls</h3>
+
+                    <p>
+                        AFTERSHIFT is fully playable on mobile. Rotate to landscape
+                        if you want more room for the Terminal and investigation
+                        panels.
+                    </p>
+
+                    <p>
+                        Terminal commands are not real operating-system commands.
+                        Everything runs inside the game simulation.
+                    </p>
+                </section>
+
+                <section class="manual-section">
+                    <h3>Getting Stuck</h3>
+
+                    <p>
+                        Check the current chapter's investigation tips and type
+                        <strong>help</strong> in the Terminal. Command names usually
+                        correspond to suspicious identifiers visible elsewhere in
+                        the interface.
+                    </p>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <script src="progress.js"></script>
+
+    <script>
+        const chapters = [
+            {
+                number: 1,
+                title: "The First Incident",
+                file: "shift1.html",
+                description:
+                    "A routine night of IT support becomes a connected security incident involving UNKNOWN-7F2."
+            },
+
+            {
+                number: 2,
+                title: "The Ghost Account",
+                file: "shift2.html",
+                description:
+                    "A terminated identity, archived incident and privileged internal token reveal that the first attack was not isolated."
+            },
+
+            {
+                number: 3,
+                title: "Dead Channel",
+                file: "shift3.html",
+                description:
+                    "Northstar's communications systems become untrustworthy. Verify identity before believing what the network tells you."
+            },
+
+            {
+                number: 4,
+                title: "Blackout Protocol",
+                file: null,
+                description:
+                    "Infrastructure failure spreads across Northstar. Restore critical services while the attacker exploits the blackout."
+            },
+
+            {
+                number: 5,
+                title: "The Last Shift",
+                file: null,
+                description:
+                    "The final Northstar incident. Every case, decision and surviving trust relationship converges."
+            }
+        ];
+
+        const bestEndingNames = {
+            1: "FULL ATTRIBUTION",
+            2: "INSIDE ACCESS",
+            3: "DEAD CHANNEL"
+        };
+
+        const caseNames = {
+            1: "CASE NS-011 // UNKNOWN-7F2",
+            2: "CASE NS-032 // GHOST ACCOUNT",
+            3: "CASE NS-044 // DEAD CHANNEL"
+        };
+
+        const caseDescriptions = {
+            1:
+                "Initial endpoint compromise, phishing delivery, credential attacks and unauthorized device activity.",
+
+            2:
+                "Recurring device identities, terminated credentials, physical access anomalies and suppressed incident history.",
+
+            3:
+                "Synthetic voice traffic, message injection, session replay and unauthorized communications relay activity."
+        };
+
+        function cleanEnding(ending) {
+            if (!ending) {
+                return "NO ENDING RECORDED";
+            }
+
+            return ending.replace(/^ENDING:\s*/i, "");
+        }
+
+        function chapterUnlocked(number) {
+            if (number === 1) return true;
+            if (number === 2) return AftershiftProgress.isComplete(1);
+            if (number === 3) return AftershiftProgress.isComplete(2);
+
+            return false;
+        }
+
+        function firstIncompleteChapter() {
+            for (let i = 1; i <= 3; i++) {
+                if (!AftershiftProgress.isComplete(i)) {
+                    return i;
+                }
+            }
+
+            return 4;
+        }
+
+        function renderProgress() {
+            const container = document.getElementById("progress-list");
+            container.innerHTML = "";
+
+            chapters.forEach(chapter => {
+                const complete =
+                    chapter.number <= 3 &&
+                    AftershiftProgress.isComplete(chapter.number);
+
+                const unlocked = chapterUnlocked(chapter.number);
+
+                const row = document.createElement("div");
+                row.className = "chapter-mini";
+
+                let statusClass = "locked";
+                let statusText = "LOCKED";
+
+                if (complete) {
+                    statusClass = "complete";
+                    statusText = "COMPLETE";
+                } else if (unlocked && chapter.number <= 3) {
+                    statusClass = "current";
+                    statusText = "AVAILABLE";
+                }
+
+                row.innerHTML = `
+                    <div class="chapter-number">
+                        ${String(chapter.number).padStart(2, "0")}
+                    </div>
+
+                    <div>
+                        <strong>${chapter.title}</strong>
+
+                        <small>
+                            ${
+                                complete
+                                    ? `BEST: ${cleanEnding(
+                                        AftershiftProgress.getBestEnding(
+                                            chapter.number
+                                        )
+                                    )}`
+                                    : statusText
+                            }
+                        </small>
+                    </div>
+
+                    <span class="status ${statusClass}">
+                        ${statusText}
+                    </span>
+                `;
+
+                container.appendChild(row);
+            });
+
+            const next = firstIncompleteChapter();
+
+            const continueButton =
+                document.getElementById("continue-button");
+
+            const label =
+                document.getElementById("continue-label");
+
+            if (next <= 3) {
+                label.textContent = `SHIFT ${next}`;
+
+                continueButton.disabled = false;
+
+                continueButton.onclick = () => {
+                    window.location.href =
+                        chapters[next - 1].file;
+                };
+            } else {
+                label.textContent = "SHIFT 4 LOCKED";
+                continueButton.disabled = true;
+            }
+        }
+
+        function renderChapterSelect() {
+            const container =
+                document.getElementById("chapter-list");
+
+            container.innerHTML = "";
+
+            chapters.forEach(chapter => {
+                const unlocked =
+                    chapterUnlocked(chapter.number) &&
+                    chapter.file;
+
+                const complete =
+                    chapter.number <= 3 &&
+                    AftershiftProgress.isComplete(chapter.number);
+
+                const card =
+                    document.createElement("div");
+
+                card.className =
+                    `chapter-card ${unlocked ? "" : "locked"}`;
+
+                card.innerHTML = `
+                    <div class="chapter-card-top">
+                        <div>
+                            <span class="chapter-label">
+                                CHAPTER ${String(chapter.number).padStart(2, "0")}
+                            </span>
+
+                            <h3>${chapter.title}</h3>
+
+                            <p>${chapter.description}</p>
+
+                            ${
+                                complete
+                                    ? `
+                                        <div class="ending-tag">
+                                            BEST ENDING //
+                                            ${cleanEnding(
+                                                AftershiftProgress.getBestEnding(
+                                                    chapter.number
+                                                )
+                                            )}
+                                        </div>
+                                    `
+                                    : ""
+                            }
+                        </div>
+
+                        <button
+                            class="chapter-action"
+                            ${unlocked ? "" : "disabled"}
+                        >
+                            ${
+                                complete
+                                    ? "REPLAY"
+                                    : unlocked
+                                        ? "START"
+                                        : "LOCKED"
+                            }
+                        </button>
+                    </div>
+                `;
+
+                if (unlocked) {
+                    card.querySelector(
+                        ".chapter-action"
+                    ).onclick = () => {
+                        window.location.href = chapter.file;
+                    };
+                }
+
+                container.appendChild(card);
+            });
+        }
+
+        function renderArchive() {
+            const container =
+                document.getElementById("archive-list");
+
+            container.innerHTML = "";
+
+            for (let chapter = 1; chapter <= 3; chapter++) {
+                const complete =
+                    AftershiftProgress.isComplete(chapter);
+
+                const record =
+                    document.createElement("div");
+
+                record.className =
+                    `archive-record ${
+                        complete ? "" : "locked"
+                    }`;
+
+                record.innerHTML = `
+                    <span>
+                        ${complete ? "CASE CLOSED" : "RECORD LOCKED"}
+                    </span>
+
+                    <h3>${caseNames[chapter]}</h3>
+
+                    <p>
+                        ${
+                            complete
+                                ? caseDescriptions[chapter]
+                                : "Complete this chapter to unlock the incident record."
+                        }
+                    </p>
+
+                    ${
+                        complete
+                            ? `
+                                <div class="ending-tag">
+                                    BEST RESULT //
+                                    ${cleanEnding(
+                                        AftershiftProgress.getBestEnding(
+                                            chapter
+                                        )
+                                    )}
+                                </div>
+                            `
+                            : ""
+                    }
+                `;
+
+                container.appendChild(record);
+            }
+        }
+
+        function openModal(id) {
+            document
+                .getElementById(id)
+                .classList.remove("hidden");
+        }
+
+        function closeModal(id) {
+            document
+                .getElementById(id)
+                .classList.add("hidden");
+        }
+
+        document
+            .getElementById("chapter-select-button")
+            .addEventListener("click", () => {
+                renderChapterSelect();
+                openModal("chapter-modal");
+            });
+
+        document
+            .getElementById("archive-button")
+            .addEventListener("click", () => {
+                renderArchive();
+                openModal("archive-modal");
+            });
+
+        document
+            .getElementById("manual-button")
+            .addEventListener("click", () => {
+                openModal("manual-modal");
+            });
+
+        document
+            .getElementById("new-game-button")
+            .addEventListener("click", () => {
+                const confirmed = confirm(
+                    "Start a new campaign? This will erase all AFTERSHIFT progress stored in this browser."
+                );
+
+                if (!confirmed) {
+                    return;
+                }
+
+                AftershiftProgress.clearCampaign();
+
+                window.location.href =
+                    "shift1.html";
+            });
+
+        document
+            .querySelectorAll("[data-close]")
+            .forEach(button => {
+                button.addEventListener("click", () => {
+                    closeModal(
+                        button.dataset.close
+                    );
+                });
+            });
+
+        document
+            .querySelectorAll(".modal")
+            .forEach(modal => {
+                modal.addEventListener("click", event => {
+                    if (event.target === modal) {
+                        modal.classList.add("hidden");
+                    }
+                });
+            });
+
+        renderProgress();
+    </script>
 </body>
 </html>
