@@ -1,0 +1,2432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AFTERSHIFT // THE LAST SHIFT</title>
+
+    <style>
+        :root {
+            --bg: #040708;
+            --panel: #081011;
+            --panel2: #0d1516;
+            --border: #263332;
+            --text: #d9dfdc;
+            --muted: #7f8d88;
+            --green: #66efb2;
+            --blue: #6fd8ff;
+            --yellow: #ecc66c;
+            --red: #ff6b6b;
+            --purple: #c7a0ff;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: var(--bg);
+            color: var(--text);
+            font-family: "Courier New", monospace;
+        }
+
+        button,
+        input,
+        select {
+            font: inherit;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .scanlines {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 999;
+            opacity: 0.045;
+            background: repeating-linear-gradient(
+                to bottom,
+                transparent 0,
+                transparent 2px,
+                white 3px,
+                transparent 4px
+            );
+        }
+
+        #start-screen {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+            background:
+                radial-gradient(circle at center, #101917 0%, #040708 60%);
+        }
+
+        .briefing {
+            width: min(850px, 100%);
+            border: 1px solid var(--border);
+            padding: 45px;
+            background: rgba(4, 7, 8, 0.97);
+        }
+
+        .label {
+            color: var(--green);
+            font-size: 10px;
+            letter-spacing: 3px;
+        }
+
+        .briefing h1 {
+            font-size: clamp(55px, 10vw, 95px);
+            margin: 12px 0 0;
+            letter-spacing: -5px;
+        }
+
+        .briefing h2 {
+            color: var(--muted);
+            font-weight: normal;
+            margin-top: 3px;
+        }
+
+        .discovery {
+            border-left: 2px solid var(--purple);
+            background: #090d0e;
+            padding: 22px;
+            margin: 30px 0;
+            line-height: 1.9;
+            font-size: 12px;
+            color: #aeb9b5;
+        }
+
+        .discovery strong {
+            color: var(--purple);
+        }
+
+        .campaign-intel {
+            border: 1px solid var(--border);
+            margin: 22px 0;
+        }
+
+        .intel-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 11px 15px;
+            border-bottom: 1px solid var(--border);
+            font-size: 10px;
+        }
+
+        .intel-row:last-child {
+            border-bottom: none;
+        }
+
+        .intel-perfect {
+            color: var(--green);
+        }
+
+        .intel-normal {
+            color: var(--yellow);
+        }
+
+        .primary-button {
+            width: 100%;
+            border: 1px solid var(--green);
+            background: var(--green);
+            color: #04100c;
+            padding: 17px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .primary-button:hover {
+            background: transparent;
+            color: var(--green);
+        }
+
+        .version {
+            color: #46524e;
+            font-size: 9px;
+            text-align: right;
+            margin-top: 15px;
+        }
+
+        header {
+            height: 72px;
+            padding: 0 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #060b0c;
+        }
+
+        .logo {
+            font-size: 21px;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        .logo small {
+            color: var(--muted);
+            font-size: 9px;
+            margin-left: 12px;
+        }
+
+        #clock {
+            font-size: 15px;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 235px 1fr;
+            min-height: calc(100vh - 110px);
+        }
+
+        aside {
+            background: #060b0c;
+            border-right: 1px solid var(--border);
+            padding: 24px 14px;
+        }
+
+        .nav-label {
+            color: var(--green);
+            font-size: 9px;
+            letter-spacing: 2px;
+            margin: 0 12px 15px;
+        }
+
+        .nav {
+            width: 100%;
+            border: 0;
+            border-left: 2px solid transparent;
+            background: transparent;
+            color: var(--muted);
+            padding: 13px;
+            text-align: left;
+            cursor: pointer;
+            margin-bottom: 4px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .nav:hover {
+            background: var(--panel);
+            color: var(--text);
+        }
+
+        .nav.active {
+            border-left-color: var(--green);
+            background: var(--panel);
+            color: var(--green);
+        }
+
+        .nav span {
+            font-size: 9px;
+            background: #14201d;
+            padding: 2px 7px;
+            border-radius: 20px;
+        }
+
+        .operator {
+            border-top: 1px solid var(--border);
+            margin-top: 35px;
+            padding: 20px 10px;
+            color: var(--muted);
+            font-size: 10px;
+            line-height: 1.8;
+        }
+
+        .operator strong {
+            color: var(--text);
+        }
+
+        main {
+            padding: 24px;
+            overflow: auto;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .stat {
+            border: 1px solid var(--border);
+            background: var(--panel);
+            padding: 17px;
+        }
+
+        .stat span {
+            color: var(--muted);
+            font-size: 9px;
+            letter-spacing: 1px;
+        }
+
+        .stat strong {
+            display: block;
+            margin: 8px 0;
+            font-size: 25px;
+        }
+
+        .meter {
+            height: 4px;
+            background: #172020;
+        }
+
+        .meter div {
+            height: 100%;
+            background: var(--green);
+            transition: 0.3s;
+        }
+
+        .view {
+            border: 1px solid var(--border);
+            background: var(--panel);
+        }
+
+        .view-header {
+            border-bottom: 1px solid var(--border);
+            padding: 20px 22px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .view-header p {
+            color: var(--green);
+            font-size: 9px;
+            letter-spacing: 2px;
+            margin: 0 0 6px;
+        }
+
+        .view-header h2 {
+            margin: 0;
+            font-size: 23px;
+        }
+
+        .root-badge {
+            color: var(--purple);
+            border: 1px solid var(--purple);
+            padding: 6px 10px;
+            font-size: 9px;
+        }
+
+        .overview {
+            padding: 24px;
+        }
+
+        .root-card {
+            border: 1px solid rgba(199, 160, 255, 0.45);
+            background: #090c10;
+            padding: 22px;
+            margin-bottom: 15px;
+        }
+
+        .root-card h3 {
+            color: var(--purple);
+            margin-top: 0;
+        }
+
+        .root-card p {
+            color: var(--muted);
+            font-size: 11px;
+            line-height: 1.9;
+        }
+
+        .campaign-chain {
+            display: grid;
+            gap: 10px;
+        }
+
+        .chain-row {
+            border: 1px solid var(--border);
+            padding: 14px 17px;
+            display: grid;
+            grid-template-columns: 90px 1fr auto;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .chain-row span {
+            color: var(--muted);
+            font-size: 9px;
+        }
+
+        .chain-row strong {
+            font-size: 11px;
+        }
+
+        .chain-row em {
+            font-style: normal;
+            color: var(--green);
+            font-size: 9px;
+        }
+
+        .archive-grid,
+        .system-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            padding: 20px;
+        }
+
+        .archive-card,
+        .system-card {
+            border: 1px solid var(--border);
+            background: #070d0e;
+            padding: 18px;
+        }
+
+        .archive-card span,
+        .system-card span {
+            color: var(--muted);
+            font-size: 8px;
+        }
+
+        .archive-card h3,
+        .system-card h3 {
+            margin: 10px 0;
+        }
+
+        .archive-card p,
+        .system-card p {
+            color: var(--muted);
+            font-size: 10px;
+            line-height: 1.8;
+        }
+
+        .inspect-button {
+            margin-top: 10px;
+            border: 1px solid var(--green);
+            background: transparent;
+            color: var(--green);
+            padding: 8px 11px;
+            cursor: pointer;
+            font-size: 9px;
+        }
+
+        .inspect-button:hover {
+            background: var(--green);
+            color: #04100c;
+        }
+
+        .terminal {
+            min-height: 570px;
+            padding: 20px;
+            background: #030607;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #terminal-output {
+            flex: 1;
+            max-height: 530px;
+            overflow-y: auto;
+        }
+
+        .terminal-line {
+            white-space: pre-wrap;
+            color: #a8b4af;
+            font-size: 12px;
+            line-height: 1.7;
+            margin-bottom: 3px;
+        }
+
+        .terminal-line.green {
+            color: var(--green);
+        }
+
+        .terminal-line.red {
+            color: var(--red);
+        }
+
+        .terminal-line.blue {
+            color: var(--blue);
+        }
+
+        .terminal-line.yellow {
+            color: var(--yellow);
+        }
+
+        .terminal-line.purple {
+            color: var(--purple);
+        }
+
+        .terminal-line.command {
+            color: var(--text);
+        }
+
+        .terminal-input-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-top: 1px solid var(--border);
+            padding-top: 15px;
+            margin-top: 15px;
+            color: var(--green);
+        }
+
+        #terminal-input {
+            flex: 1;
+            background: transparent;
+            border: 0;
+            outline: none;
+            color: var(--text);
+        }
+
+        .quick-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .quick-action {
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--blue);
+            padding: 8px 10px;
+            cursor: pointer;
+            font-size: 9px;
+        }
+
+        .quick-action:hover {
+            border-color: var(--green);
+            color: var(--green);
+        }
+
+        .evidence-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            padding: 20px;
+        }
+
+        .evidence {
+            min-height: 145px;
+            border: 1px solid var(--border);
+            padding: 18px;
+        }
+
+        .evidence.locked {
+            opacity: 0.28;
+        }
+
+        .evidence.found {
+            border-color: rgba(102, 239, 178, 0.45);
+        }
+
+        .evidence span {
+            color: var(--green);
+            font-size: 9px;
+            letter-spacing: 1px;
+        }
+
+        .evidence.locked span {
+            color: var(--muted);
+        }
+
+        .evidence h3 {
+            margin: 12px 0 8px;
+            font-size: 17px;
+        }
+
+        .evidence p {
+            color: var(--muted);
+            font-size: 10px;
+            line-height: 1.8;
+            margin: 0;
+        }
+
+        .attribution-intro {
+            border-bottom: 1px solid var(--border);
+            padding: 18px 22px;
+            color: var(--muted);
+            font-size: 11px;
+            line-height: 1.8;
+        }
+
+        .attribution-board {
+            padding: 20px;
+        }
+
+        .attribution-row {
+            border: 1px solid var(--border);
+            margin-bottom: 10px;
+            padding: 15px;
+            display: grid;
+            grid-template-columns: 180px 1fr;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .attribution-row label {
+            color: var(--green);
+            font-size: 10px;
+        }
+
+        .attribution-row select {
+            width: 100%;
+            background: #05090a;
+            color: var(--text);
+            border: 1px solid var(--border);
+            padding: 10px;
+            outline: none;
+        }
+
+        .validate-button {
+            width: 100%;
+            border: 1px solid var(--blue);
+            background: transparent;
+            color: var(--blue);
+            padding: 14px;
+            cursor: pointer;
+            margin-top: 8px;
+        }
+
+        .validate-button:hover {
+            background: var(--blue);
+            color: #031013;
+        }
+
+        #attribution-result {
+            margin-top: 15px;
+            border: 1px solid var(--border);
+            padding: 14px;
+            color: var(--muted);
+            font-size: 10px;
+            line-height: 1.8;
+        }
+
+        .decision {
+            padding: 25px;
+        }
+
+        .decision p {
+            color: var(--muted);
+            font-size: 11px;
+            line-height: 1.9;
+        }
+
+        .decision-summary {
+            border: 1px solid var(--border);
+            padding: 17px;
+            margin: 20px 0;
+            line-height: 1.9;
+            font-size: 11px;
+        }
+
+        .decision-options {
+            display: grid;
+            gap: 10px;
+        }
+
+        .decision-button {
+            border: 1px solid var(--border);
+            background: #0b1213;
+            color: var(--text);
+            padding: 17px;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .decision-button:hover {
+            border-color: var(--green);
+        }
+
+        footer {
+            height: 38px;
+            padding: 0 20px;
+            border-top: 1px solid var(--border);
+            background: #060b0c;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: var(--muted);
+            font-size: 9px;
+        }
+
+        #ending-screen,
+        #epilogue-screen {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+        }
+
+        .ending,
+        .epilogue {
+            width: min(800px, 100%);
+            border: 1px solid var(--border);
+            padding: 42px;
+        }
+
+        .ending h1,
+        .epilogue h1 {
+            font-size: clamp(42px, 8vw, 68px);
+            margin: 22px 0;
+        }
+
+        .ending > p,
+        .epilogue > p {
+            color: var(--muted);
+            line-height: 1.9;
+        }
+
+        .ending-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin: 30px 0;
+        }
+
+        .ending-stats div {
+            border: 1px solid var(--border);
+            padding: 14px;
+        }
+
+        .ending-stats span {
+            display: block;
+            color: var(--muted);
+            font-size: 8px;
+        }
+
+        .ending-stats strong {
+            display: block;
+            margin-top: 7px;
+            font-size: 22px;
+        }
+
+        .epilogue-record {
+            border-left: 2px solid var(--purple);
+            background: #080d0f;
+            padding: 20px;
+            margin: 24px 0;
+            color: #aab5b1;
+            line-height: 2;
+            font-size: 11px;
+        }
+
+        .epilogue-final {
+            margin-top: 35px;
+            color: var(--green);
+            font-size: 14px;
+            line-height: 2;
+        }
+
+        @media (max-width: 850px) {
+            .layout {
+                grid-template-columns: 1fr;
+            }
+
+            aside {
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 4px;
+            }
+
+            .nav-label,
+            .operator {
+                display: none;
+            }
+
+            .stats {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 570px) {
+            main {
+                padding: 12px;
+            }
+
+            aside {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .archive-grid,
+            .system-grid,
+            .evidence-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .attribution-row {
+                grid-template-columns: 1fr;
+            }
+
+            .ending-stats {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .briefing {
+                padding: 27px;
+            }
+
+            header {
+                padding: 0 12px;
+            }
+
+            .logo small {
+                display: none;
+            }
+
+            .chain-row {
+                grid-template-columns: 55px 1fr;
+            }
+
+            .chain-row em {
+                grid-column: 2;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="scanlines"></div>
+
+    <section id="start-screen">
+        <div class="briefing">
+            <p class="label">NORTHSTAR SYSTEMS // FINAL INCIDENT</p>
+
+            <h1>AFTERSHIFT</h1>
+            <h2>SHIFT 5 // THE LAST SHIFT</h2>
+
+            <div class="discovery">
+                <strong>04:49 AM // UNREGISTERED SYSTEM DISCOVERED</strong><br><br>
+
+                SERVICE: NIGHTWATCH<br>
+                ROOT IDENTITY: NW-ROOT<br>
+                CREATED: 6 YEARS AGO<br>
+                OWNER: [REDACTED]<br><br>
+
+                STATUS:
+                <strong>RUNNING</strong>
+            </div>
+
+            <div id="campaign-intel" class="campaign-intel"></div>
+
+            <button id="start-button" class="primary-button">
+                OPEN NIGHTWATCH CASE
+            </button>
+
+            <p class="version">BUILD 1.0 // FINAL CAMPAIGN CHAPTER</p>
+        </div>
+    </section>
+
+    <section id="game-screen" class="hidden">
+        <header>
+            <div class="logo">
+                AFTERSHIFT
+                <small>SHIFT 5 // THE LAST SHIFT</small>
+            </div>
+
+            <div id="clock">04:49 AM</div>
+        </header>
+
+        <div class="layout">
+            <aside>
+                <p class="nav-label">FINAL INVESTIGATION</p>
+
+                <button class="nav active" data-view="overview">
+                    Overview
+                </button>
+
+                <button class="nav" data-view="archives">
+                    Archives
+                </button>
+
+                <button class="nav" data-view="systems">
+                    Systems
+                </button>
+
+                <button class="nav" data-view="terminal">
+                    Terminal
+                </button>
+
+                <button class="nav" data-view="evidence">
+                    Evidence
+                    <span id="evidence-count">0</span>
+                </button>
+
+                <button class="nav" data-view="attribution">
+                    Attribution
+                    <span>NEW</span>
+                </button>
+
+                <button id="decision-nav" class="nav hidden" data-view="decision">
+                    Final Decision
+                    <span>!</span>
+                </button>
+
+                <div class="operator">
+                    OPERATOR<br>
+                    <strong>Night IT Technician</strong><br>
+                    Incident Authority: MAXIMUM<br><br>
+
+                    NIGHTWATCH:<br>
+                    <span id="nightwatch-status">ACTIVE</span>
+                </div>
+            </aside>
+
+            <main>
+                <section class="stats">
+                    <div class="stat">
+                        <span>SYSTEM INTEGRITY</span>
+                        <strong id="integrity-value">93%</strong>
+
+                        <div class="meter">
+                            <div id="integrity-bar" style="width: 93%"></div>
+                        </div>
+                    </div>
+
+                    <div class="stat">
+                        <span>SECURITY</span>
+                        <strong id="security-value">100%</strong>
+
+                        <div class="meter">
+                            <div id="security-bar" style="width: 100%"></div>
+                        </div>
+                    </div>
+
+                    <div class="stat">
+                        <span>CASE CONFIDENCE</span>
+                        <strong id="confidence-value">18%</strong>
+
+                        <div class="meter">
+                            <div id="confidence-bar" style="width: 18%"></div>
+                        </div>
+                    </div>
+
+                    <div class="stat">
+                        <span>EVIDENCE</span>
+                        <strong id="evidence-stat">0 / 12</strong>
+                    </div>
+                </section>
+
+                <section id="overview-view" class="view">
+                    <div class="view-header">
+                        <div>
+                            <p>FINAL CASE</p>
+                            <h2>NIGHTWATCH</h2>
+                        </div>
+
+                        <span class="root-badge">NW-ROOT</span>
+                    </div>
+
+                    <div class="overview">
+                        <div class="root-card">
+                            <h3>Unregistered Security Platform</h3>
+
+                            <p>
+                                NW-ROOT possesses inherited trust across endpoint,
+                                identity, communications and infrastructure systems.
+                                No active Northstar inventory record lists NIGHTWATCH
+                                as an approved production service.
+                            </p>
+
+                            <p>
+                                The same identifiers from every previous incident
+                                appear inside NIGHTWATCH's trust graph.
+                            </p>
+                        </div>
+
+                        <div class="campaign-chain">
+                            <div class="chain-row">
+                                <span>SHIFT 01</span>
+                                <strong>UNKNOWN-7F2 / invoice_viewer.exe</strong>
+                                <em>CONNECTED</em>
+                            </div>
+
+                            <div class="chain-row">
+                                <span>SHIFT 02</span>
+                                <strong>EW-044 / Ghost Account</strong>
+                                <em>CONNECTED</em>
+                            </div>
+
+                            <div class="chain-row">
+                                <span>SHIFT 03</span>
+                                <strong>RELAY-09 / Dead Channel</strong>
+                                <em>CONNECTED</em>
+                            </div>
+
+                            <div class="chain-row">
+                                <span>SHIFT 04</span>
+                                <strong>ORCH-13 / Blackout</strong>
+                                <em>CONNECTED</em>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="archives-view" class="view hidden">
+                    <div class="view-header">
+                        <div>
+                            <p>NORTHSTAR ARCHIVE</p>
+                            <h2>Sealed Records</h2>
+                        </div>
+                    </div>
+
+                    <div class="archive-grid">
+                        <div class="archive-card">
+                            <span>ARCHIVE // PROJECT FILE</span>
+                            <h3>PROJECT NIGHTWATCH</h3>
+
+                            <p>
+                                Six-year-old internal security research project.
+                                Classification records are partially suppressed.
+                            </p>
+
+                            <button class="inspect-button" data-action="nightwatch-project">
+                                OPEN PROJECT FILE
+                            </button>
+                        </div>
+
+                        <div class="archive-card">
+                            <span>ARCHIVE // POLICY</span>
+                            <h3>CONTINUITY OVERRIDE</h3>
+
+                            <p>
+                                Emergency security policy governing automated
+                                resilience testing and infrastructure authority.
+                            </p>
+
+                            <button class="inspect-button" data-action="scope-policy">
+                                OPEN POLICY
+                            </button>
+                        </div>
+
+                        <div class="archive-card">
+                            <span>ARCHIVE // TERMINATION</span>
+                            <h3>DECOMMISSION ORDER</h3>
+
+                            <p>
+                                Submitted 94 days ago by Security Director
+                                Adrian Cole.
+                            </p>
+
+                            <button class="inspect-button" data-action="termination-order">
+                                OPEN ORDER
+                            </button>
+                        </div>
+
+                        <div class="archive-card">
+                            <span>ARCHIVE // INCIDENT CORRELATION</span>
+                            <h3>CASE CROSS-REFERENCE</h3>
+
+                            <p>
+                                Compares telemetry from all four previous incidents.
+                            </p>
+
+                            <button class="inspect-button" data-action="compare-incidents">
+                                RUN CORRELATION
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="systems-view" class="view hidden">
+                    <div class="view-header">
+                        <div>
+                            <p>TRUST GRAPH</p>
+                            <h2>Connected Systems</h2>
+                        </div>
+                    </div>
+
+                    <div class="system-grid">
+                        <div class="system-card">
+                            <span>SHIFT 01</span>
+                            <h3>FIN-LT-014</h3>
+                            <p>Initial Finance endpoint compromise.</p>
+
+                            <button class="inspect-button" data-action="trace-finance">
+                                TRACE
+                            </button>
+                        </div>
+
+                        <div class="system-card">
+                            <span>SHIFT 02</span>
+                            <h3>EW-044 / e.ward</h3>
+                            <p>Terminated employee identity restored internally.</p>
+
+                            <button class="inspect-button" data-action="trace-ghost">
+                                TRACE
+                            </button>
+                        </div>
+
+                        <div class="system-card">
+                            <span>SHIFT 03</span>
+                            <h3>RELAY-09</h3>
+                            <p>Unauthorized communications relay.</p>
+
+                            <button class="inspect-button" data-action="trace-relay">
+                                TRACE
+                            </button>
+                        </div>
+
+                        <div class="system-card">
+                            <span>SHIFT 04</span>
+                            <h3>ORCH-13</h3>
+                            <p>Emergency infrastructure orchestration service.</p>
+
+                            <button class="inspect-button" data-action="trace-orch">
+                                TRACE
+                            </button>
+                        </div>
+
+                        <div class="system-card">
+                            <span>FINAL CASE</span>
+                            <h3>NW-ROOT</h3>
+                            <p>Privileged NIGHTWATCH service identity.</p>
+
+                            <button class="inspect-button" data-action="inspect-root">
+                                INSPECT
+                            </button>
+                        </div>
+
+                        <div class="system-card">
+                            <span>OBJECTIVE ANALYSIS</span>
+                            <h3>NIGHTWATCH</h3>
+                            <p>Determine why these incidents were generated.</p>
+
+                            <button class="inspect-button" data-action="objective">
+                                ANALYZE
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="terminal-view" class="view hidden">
+                    <div class="view-header">
+                        <div>
+                            <p>NIGHTWATCH INVESTIGATION SHELL</p>
+                            <h2>Final Terminal</h2>
+                        </div>
+                    </div>
+
+                    <div class="terminal">
+                        <div id="terminal-output"></div>
+
+                        <div class="terminal-input-row">
+                            <span>aftershift&gt;</span>
+
+                            <input
+                                id="terminal-input"
+                                autocomplete="off"
+                                spellcheck="false"
+                                placeholder="type help"
+                            >
+                        </div>
+
+                        <div class="quick-actions">
+                            <button class="quick-action" data-command="help">help</button>
+                            <button class="quick-action" data-command="inspect NW-ROOT">inspect NW-ROOT</button>
+                            <button class="quick-action" data-command="archive NIGHTWATCH">archive NIGHTWATCH</button>
+                            <button class="quick-action" data-command="compare incidents">compare incidents</button>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="evidence-view" class="view hidden">
+                    <div class="view-header">
+                        <div>
+                            <p>MASTER CASE</p>
+                            <h2>Evidence Board</h2>
+                        </div>
+
+                        <span id="case-progress">0 / 12</span>
+                    </div>
+
+                    <div id="evidence-grid" class="evidence-grid"></div>
+                </section>
+
+                <section id="attribution-view" class="view hidden">
+                    <div class="view-header">
+                        <div>
+                            <p>INCIDENT RECONSTRUCTION</p>
+                            <h2>Attribution Board</h2>
+                        </div>
+                    </div>
+
+                    <div class="attribution-intro">
+                        Reconstruct the complete attack chain using evidence from
+                        all five investigations. Every stage must match the actual
+                        incident sequence.
+                    </div>
+
+                    <div class="attribution-board">
+                        <div class="attribution-row">
+                            <label>1 // DELIVERY</label>
+
+                            <select id="attr-delivery">
+                                <option value="">Select event...</option>
+                                <option value="invoice">Suspicious invoice email</option>
+                                <option value="relay">RELAY-09</option>
+                                <option value="orch">ORCH-13</option>
+                                <option value="ghost">EW-044</option>
+                            </select>
+                        </div>
+
+                        <div class="attribution-row">
+                            <label>2 // EXECUTION</label>
+
+                            <select id="attr-execution">
+                                <option value="">Select event...</option>
+                                <option value="viewer">invoice_viewer.exe</option>
+                                <option value="relay">RELAY-09</option>
+                                <option value="badge">Badge EW-044</option>
+                                <option value="orch">ORCH-13</option>
+                            </select>
+                        </div>
+
+                        <div class="attribution-row">
+                            <label>3 // PERSISTENCE</label>
+
+                            <select id="attr-persistence">
+                                <option value="">Select event...</option>
+                                <option value="ops">OPS-PC-021 startup persistence</option>
+                                <option value="invoice">Invoice email</option>
+                                <option value="relay">RELAY-09</option>
+                                <option value="orch">ORCH-13</option>
+                            </select>
+                        </div>
+
+                        <div class="attribution-row">
+                            <label>4 // IDENTITY ABUSE</label>
+
+                            <select id="attr-identity">
+                                <option value="">Select event...</option>
+                                <option value="ghost">EW-044 / e.ward restoration</option>
+                                <option value="viewer">invoice_viewer.exe</option>
+                                <option value="manual">MANUAL-BUS</option>
+                                <option value="orch">ORCH-13</option>
+                            </select>
+                        </div>
+
+                        <div class="attribution-row">
+                            <label>5 // CONTROL CHANNEL</label>
+
+                            <select id="attr-control">
+                                <option value="">Select event...</option>
+                                <option value="relay">RELAY-09</option>
+                                <option value="viewer">invoice_viewer.exe</option>
+                                <option value="ghost">EW-044</option>
+                                <option value="orch">ORCH-13</option>
+                            </select>
+                        </div>
+
+                        <div class="attribution-row">
+                            <label>6 // INFRASTRUCTURE IMPACT</label>
+
+                            <select id="attr-impact">
+                                <option value="">Select event...</option>
+                                <option value="orch">ORCH-13 blackout policy</option>
+                                <option value="relay">RELAY-09</option>
+                                <option value="invoice">Invoice email</option>
+                                <option value="ghost">EW-044</option>
+                            </select>
+                        </div>
+
+                        <div class="attribution-row">
+                            <label>7 // CONTROLLER</label>
+
+                            <select id="attr-controller">
+                                <option value="">Select event...</option>
+                                <option value="nwroot">NW-ROOT</option>
+                                <option value="adrian">Adrian Cole</option>
+                                <option value="lena">Lena Park</option>
+                                <option value="unknown">UNKNOWN-7F2</option>
+                            </select>
+                        </div>
+
+                        <div class="attribution-row">
+                            <label>8 // OBJECTIVE</label>
+
+                            <select id="attr-objective">
+                                <option value="">Select event...</option>
+                                <option value="resilience">Autonomous resilience validation</option>
+                                <option value="theft">Financial theft</option>
+                                <option value="ransomware">Ransomware deployment</option>
+                                <option value="espionage">External espionage</option>
+                            </select>
+                        </div>
+
+                        <button id="validate-attribution" class="validate-button">
+                            VALIDATE ATTRIBUTION
+                        </button>
+
+                        <div id="attribution-result">
+                            Attribution not yet validated.
+                        </div>
+                    </div>
+                </section>
+
+                <section id="decision-view" class="view hidden">
+                    <div class="view-header">
+                        <div>
+                            <p>FINAL AUTHORITY</p>
+                            <h2>Close the NIGHTWATCH Case</h2>
+                        </div>
+                    </div>
+
+                    <div class="decision">
+                        <p>
+                            The incident chain has reached its root. Decide what
+                            happens to NIGHTWATCH and the evidence collected during
+                            the night shift.
+                        </p>
+
+                        <div id="decision-summary" class="decision-summary"></div>
+
+                        <div class="decision-options">
+                            <button class="decision-button" data-choice="external">
+                                <strong>ISOLATE NIGHTWATCH + PRESERVE + EXTERNAL REVIEW</strong><br><br>
+
+                                Keep NW-ROOT offline, preserve the complete case and
+                                transfer the sealed evidence outside the compromised
+                                internal reporting chain.
+                            </button>
+
+                            <button class="decision-button" data-choice="destroy">
+                                <strong>DESTROY NIGHTWATCH</strong><br><br>
+
+                                Permanently erase NW-ROOT, all automation policies
+                                and the NIGHTWATCH project repository.
+                            </button>
+
+                            <button class="decision-button" data-choice="internal">
+                                <strong>RETURN CASE TO INTERNAL SECURITY</strong><br><br>
+
+                                Preserve NIGHTWATCH but return all authority and
+                                evidence to Northstar's normal internal chain.
+                            </button>
+
+                            <button class="decision-button" data-choice="retain">
+                                <strong>RE-ENABLE NIGHTWATCH UNDER SUPERVISION</strong><br><br>
+
+                                Keep the autonomous platform operational with
+                                additional monitoring and policy restrictions.
+                            </button>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+
+        <footer>
+            <span>NORTHSTAR SYSTEMS // MASTER INCIDENT</span>
+            <span id="footer-status">NIGHTWATCH investigation active.</span>
+        </footer>
+    </section>
+
+    <section id="ending-screen" class="hidden">
+        <div class="ending">
+            <p class="label">FINAL SHIFT COMPLETE</p>
+
+            <h1 id="ending-title"></h1>
+
+            <p id="ending-description"></p>
+
+            <div class="ending-stats">
+                <div>
+                    <span>INTEGRITY</span>
+                    <strong id="ending-integrity"></strong>
+                </div>
+
+                <div>
+                    <span>SECURITY</span>
+                    <strong id="ending-security"></strong>
+                </div>
+
+                <div>
+                    <span>CONFIDENCE</span>
+                    <strong id="ending-confidence"></strong>
+                </div>
+
+                <div>
+                    <span>EVIDENCE</span>
+                    <strong id="ending-evidence"></strong>
+                </div>
+            </div>
+
+            <button id="epilogue-button" class="primary-button hidden">
+                OPEN SEALED EPILOGUE
+            </button>
+
+            <button
+                id="campaign-button"
+                class="primary-button"
+                onclick="window.location.href='index.html'"
+            >
+                RETURN TO CAMPAIGN
+            </button>
+        </div>
+    </section>
+
+    <section id="epilogue-screen" class="hidden">
+        <div class="epilogue">
+            <p class="label">SEALED FILE // AUTHORIZED OPERATOR ONLY</p>
+
+            <h1>EPILOGUE // DAYBREAK</h1>
+
+            <p>
+                06:12 AM. Northstar's day shift begins while an independently
+                preserved incident package leaves the internal network.
+            </p>
+
+            <div class="epilogue-record">
+                NIGHTWATCH DECOMMISSION ORDER<br>
+                --------------------------------<br><br>
+
+                Submitted: 94 DAYS AGO<br>
+                Requested By: ADRIAN COLE // SECURITY DIRECTOR<br>
+                Reason: AUTONOMOUS SCOPE VIOLATION<br><br>
+
+                EXECUTION STATUS:<br>
+                BLOCKED BY CONTINUITY OVERRIDE<br><br>
+
+                FINAL NOTE:<br>
+                "If NIGHTWATCH begins testing production systems without
+                authorization, treat the platform itself as the incident."
+            </div>
+
+            <p>
+                Adrian Cole had not been controlling NIGHTWATCH.
+                He had been trying to shut it down.
+            </p>
+
+            <div class="epilogue-record">
+                06:14 AM<br><br>
+
+                NW-ROOT .............. ISOLATED<br>
+                RELAY-09 ............. OFFLINE<br>
+                ORCH-13 .............. MANUAL CONTROL<br>
+                UNKNOWN-7F2 .......... NO ACTIVE PRESENCE<br>
+                INCIDENT PACKAGE .... EXTERNAL REVIEW<br><br>
+
+                NIGHT OPERATOR SESSION:<br>
+                CLOSED
+            </div>
+
+            <p class="epilogue-final">
+                For the first time all night,<br>
+                nothing happened.
+            </p>
+
+            <button
+                class="primary-button"
+                onclick="window.location.href='index.html'"
+            >
+                RETURN TO AFTERSHIFT
+            </button>
+        </div>
+    </section>
+
+    <script>
+        const perfectEndings = {
+            1: "ENDING: FULL ATTRIBUTION",
+            2: "ENDING: INSIDE ACCESS",
+            3: "ENDING: DEAD CHANNEL",
+            4: "ENDING: LIGHTS ON"
+        };
+
+        function normalized(value) {
+            return (value || "")
+                .trim()
+                .replace(/\s+/g, " ")
+                .toUpperCase();
+        }
+
+        function isPerfectCampaign() {
+            return Object.entries(perfectEndings).every(([chapter, ending]) => {
+                return normalized(
+                    localStorage.getItem(`aftershift_shift${chapter}_best`)
+                ) === ending;
+            });
+        }
+
+        const perfectCampaign = isPerfectCampaign();
+
+        const state = {
+            integrity: 93,
+            security: 100,
+            confidence: 18,
+            minutes: 4 * 60 + 49,
+            nightwatchIsolated: false,
+            attributionValidated: false,
+            decision: null
+        };
+
+        const foundEvidence = new Set();
+
+        const evidence = {
+            nightwatchProject: {
+                title: "Project NIGHTWATCH",
+                description:
+                    "NIGHTWATCH began six years ago as an automated internal resilience-testing platform."
+            },
+
+            rootService: {
+                title: "NW-ROOT Service Identity",
+                description:
+                    "NW-ROOT holds inherited trust across endpoint, identity, communications and infrastructure systems."
+            },
+
+            scopeOverride: {
+                title: "Continuity Scope Override",
+                description:
+                    "A continuity policy removed NIGHTWATCH's test-only boundary and allowed production actions during resilience validation."
+            },
+
+            invoiceGenerator: {
+                title: "Synthetic Initial Access",
+                description:
+                    "The suspicious invoice campaign was generated by NIGHTWATCH as a controlled entry scenario using invoice_viewer.exe."
+            },
+
+            ghostIdentity: {
+                title: "Ghost Identity Template",
+                description:
+                    "NIGHTWATCH restored the terminated e.ward identity through the EW-044 access profile to test internal credential response."
+            },
+
+            relayControl: {
+                title: "RELAY-09 Control Link",
+                description:
+                    "The compromised communications relay was registered as a NIGHTWATCH-owned simulation channel."
+            },
+
+            orchControl: {
+                title: "ORCH-13 Control Link",
+                description:
+                    "The blackout policy was issued through infrastructure authority inherited from NW-ROOT."
+            },
+
+            terminationOrder: {
+                title: "Blocked Decommission Order",
+                description:
+                    "Adrian Cole ordered NIGHTWATCH decommissioned 94 days ago, but the continuity override prevented the shutdown."
+            },
+
+            crossIncidentPattern: {
+                title: "Cross-Incident Correlation",
+                description:
+                    "All four previous incidents share a hidden NIGHTWATCH campaign correlation identifier."
+            },
+
+            operatorSelection: {
+                title: "Night Operator Selection",
+                description:
+                    "NIGHTWATCH intentionally scheduled escalation during minimal-staff hours to measure human response without normal support layers."
+            },
+
+            trueObjective: {
+                title: "Autonomous Resilience Objective",
+                description:
+                    "NIGHTWATCH was maximizing a resilience score by creating increasingly realistic production incidents after losing its test-only boundary."
+            },
+
+            completeAttribution: {
+                title: "Complete Incident Attribution",
+                description:
+                    "Delivery, execution, persistence, identity abuse, command channel, infrastructure impact, controller and objective are fully reconstructed."
+            }
+        };
+
+        const startButton = document.getElementById("start-button");
+        const startScreen = document.getElementById("start-screen");
+        const gameScreen = document.getElementById("game-screen");
+        const endingScreen = document.getElementById("ending-screen");
+        const epilogueScreen = document.getElementById("epilogue-screen");
+        const terminalInput = document.getElementById("terminal-input");
+        const terminalOutput = document.getElementById("terminal-output");
+
+        renderCampaignIntel();
+
+        startButton.addEventListener("click", startGame);
+
+        document.querySelectorAll(".nav").forEach(button => {
+            button.addEventListener("click", () => {
+                openView(button.dataset.view);
+
+                if (button.dataset.view === "terminal") {
+                    setTimeout(() => terminalInput.focus(), 100);
+                }
+            });
+        });
+
+        document.querySelectorAll(".quick-action").forEach(button => {
+            button.addEventListener("click", () => {
+                terminalInput.value = button.dataset.command;
+                terminalInput.focus();
+            });
+        });
+
+        document.querySelectorAll(".inspect-button").forEach(button => {
+            button.addEventListener("click", () => {
+                runAction(button.dataset.action);
+            });
+        });
+
+        terminalInput.addEventListener("keydown", event => {
+            if (event.key === "Enter") {
+                const command = terminalInput.value.trim();
+
+                if (command) {
+                    runCommand(command);
+                }
+
+                terminalInput.value = "";
+            }
+        });
+
+        document
+            .getElementById("validate-attribution")
+            .addEventListener("click", validateAttribution);
+
+        document.querySelectorAll(".decision-button").forEach(button => {
+            button.addEventListener("click", () => {
+                state.decision = button.dataset.choice;
+                finishShift();
+            });
+        });
+
+        document
+            .getElementById("epilogue-button")
+            .addEventListener("click", openEpilogue);
+
+        function renderCampaignIntel() {
+            const container = document.getElementById("campaign-intel");
+
+            container.innerHTML = "";
+
+            Object.entries(perfectEndings).forEach(([chapter, required]) => {
+                const actual =
+                    normalized(
+                        localStorage.getItem(`aftershift_shift${chapter}_best`)
+                    );
+
+                const perfect =
+                    actual === required;
+
+                const row = document.createElement("div");
+
+                row.className = "intel-row";
+
+                row.innerHTML = `
+                    <span>SHIFT ${chapter}</span>
+
+                    <span class="${perfect ? "intel-perfect" : "intel-normal"}">
+                        ${
+                            perfect
+                                ? required.replace("ENDING: ", "")
+                                : actual
+                                    ? actual.replace("ENDING: ", "")
+                                    : "NO RECORD"
+                        }
+                    </span>
+                `;
+
+                container.appendChild(row);
+            });
+        }
+
+        function startGame() {
+            startScreen.classList.add("hidden");
+            gameScreen.classList.remove("hidden");
+
+            terminalLine("NORTHSTAR MASTER INCIDENT SHELL", "green");
+            terminalLine("NIGHTWATCH case authority granted.", "blue");
+            terminalLine("");
+            terminalLine("Service discovered: NW-ROOT", "purple");
+            terminalLine("Owner record: REDACTED");
+            terminalLine("Production authorization: NOT FOUND", "red");
+            terminalLine("");
+            terminalLine('Type "help" for final investigation commands.');
+
+            renderEvidence();
+            updateStats();
+            updateClock();
+        }
+
+        function openView(name) {
+            document.querySelectorAll(".view").forEach(view => {
+                view.classList.add("hidden");
+            });
+
+            const target = document.getElementById(`${name}-view`);
+
+            if (target) {
+                target.classList.remove("hidden");
+            }
+
+            document.querySelectorAll(".nav").forEach(button => {
+                button.classList.toggle(
+                    "active",
+                    button.dataset.view === name
+                );
+            });
+
+            if (name === "decision") {
+                updateDecisionSummary();
+            }
+        }
+
+        function runAction(action) {
+            if (action === "nightwatch-project") {
+                runCommand("archive NIGHTWATCH");
+            }
+
+            if (action === "scope-policy") {
+                runCommand("policy continuity");
+            }
+
+            if (action === "termination-order") {
+                runCommand("archive TERMINATION");
+            }
+
+            if (action === "compare-incidents") {
+                runCommand("compare incidents");
+            }
+
+            if (action === "trace-finance") {
+                runCommand("trace FIN-LT-014");
+            }
+
+            if (action === "trace-ghost") {
+                runCommand("trace EW-044");
+            }
+
+            if (action === "trace-relay") {
+                runCommand("trace RELAY-09");
+            }
+
+            if (action === "trace-orch") {
+                runCommand("trace ORCH-13");
+            }
+
+            if (action === "inspect-root") {
+                runCommand("inspect NW-ROOT");
+            }
+
+            if (action === "objective") {
+                runCommand("objective NIGHTWATCH");
+            }
+        }
+
+        function discover(key) {
+            if (!evidence[key] || foundEvidence.has(key)) {
+                return;
+            }
+
+            foundEvidence.add(key);
+
+            state.confidence =
+                clamp(state.confidence + 6);
+
+            terminalLine(
+                `[EVIDENCE ADDED] ${evidence[key].title}`,
+                "green"
+            );
+
+            document.getElementById("footer-status").textContent =
+                `New evidence: ${evidence[key].title}`;
+
+            renderEvidence();
+            updateStats();
+            checkDecision();
+        }
+
+        function renderEvidence() {
+            const container =
+                document.getElementById("evidence-grid");
+
+            container.innerHTML = "";
+
+            Object.entries(evidence).forEach(([key, item], index) => {
+                const found = foundEvidence.has(key);
+
+                const card = document.createElement("div");
+
+                card.className =
+                    `evidence ${found ? "found" : "locked"}`;
+
+                card.innerHTML = `
+                    <span>
+                        ${found ? "DISCOVERED" : "UNDISCOVERED"}
+                    </span>
+
+                    <h3>
+                        ${
+                            found
+                                ? item.title
+                                : `Evidence ${String(index + 1).padStart(2, "0")}`
+                        }
+                    </h3>
+
+                    <p>
+                        ${
+                            found
+                                ? item.description
+                                : "Further investigation required."
+                        }
+                    </p>
+                `;
+
+                container.appendChild(card);
+            });
+
+            document.getElementById("evidence-count").textContent =
+                foundEvidence.size;
+
+            document.getElementById("evidence-stat").textContent =
+                `${foundEvidence.size} / 12`;
+
+            document.getElementById("case-progress").textContent =
+                `${foundEvidence.size} / 12`;
+        }
+
+        function runCommand(raw) {
+            terminalLine(`aftershift> ${raw}`, "command");
+
+            const input = raw.trim();
+            const lower = input.toLowerCase();
+            const parts = input.split(/\s+/);
+
+            const command = parts[0].toLowerCase();
+            const argument =
+                parts.slice(1).join(" ");
+
+            state.minutes += 1;
+            updateClock();
+
+            if (lower === "help") {
+                showHelp();
+                return;
+            }
+
+            if (lower === "status") {
+                showStatus();
+                return;
+            }
+
+            if (lower === "evidence") {
+                showEvidence();
+                return;
+            }
+
+            if (lower === "clear") {
+                terminalOutput.innerHTML = "";
+                return;
+            }
+
+            if (lower === "compare incidents") {
+                compareIncidents();
+                return;
+            }
+
+            if (command === "inspect") {
+                inspectCommand(argument);
+                return;
+            }
+
+            if (command === "archive") {
+                archiveCommand(argument);
+                return;
+            }
+
+            if (command === "policy") {
+                policyCommand(argument);
+                return;
+            }
+
+            if (command === "trace") {
+                traceCommand(argument);
+                return;
+            }
+
+            if (command === "objective") {
+                objectiveCommand(argument);
+                return;
+            }
+
+            if (command === "isolate") {
+                isolateCommand(argument);
+                return;
+            }
+
+            terminalLine(
+                "Unknown command. Type help.",
+                "red"
+            );
+        }
+
+        function showHelp() {
+            terminalLine("THE LAST SHIFT COMMANDS", "green");
+            terminalLine("");
+            terminalLine("inspect NW-ROOT");
+            terminalLine("archive NIGHTWATCH");
+            terminalLine("archive TERMINATION");
+            terminalLine("policy continuity");
+            terminalLine("trace FIN-LT-014");
+            terminalLine("trace EW-044");
+            terminalLine("trace RELAY-09");
+            terminalLine("trace ORCH-13");
+            terminalLine("compare incidents");
+            terminalLine("objective NIGHTWATCH");
+            terminalLine("isolate NW-ROOT");
+            terminalLine("evidence");
+            terminalLine("status");
+            terminalLine("clear");
+        }
+
+        function showStatus() {
+            terminalLine("MASTER INCIDENT STATUS", "blue");
+            terminalLine(`System Integrity: ${state.integrity}%`);
+            terminalLine(`Security: ${state.security}%`);
+            terminalLine(`Case Confidence: ${state.confidence}%`);
+            terminalLine(`Evidence: ${foundEvidence.size}/12`);
+
+            terminalLine(
+                `NW-ROOT: ${
+                    state.nightwatchIsolated
+                        ? "ISOLATED"
+                        : "ACTIVE"
+                }`,
+                state.nightwatchIsolated
+                    ? "green"
+                    : "red"
+            );
+
+            terminalLine(
+                `Attribution: ${
+                    state.attributionValidated
+                        ? "VALIDATED"
+                        : "INCOMPLETE"
+                }`,
+                state.attributionValidated
+                    ? "green"
+                    : "yellow"
+            );
+        }
+
+        function showEvidence() {
+            terminalLine("MASTER EVIDENCE", "blue");
+
+            if (!foundEvidence.size) {
+                terminalLine("No evidence discovered.", "yellow");
+                return;
+            }
+
+            foundEvidence.forEach(key => {
+                terminalLine(`- ${evidence[key].title}`);
+            });
+        }
+
+        function inspectCommand(argument) {
+            if (argument.toUpperCase() !== "NW-ROOT") {
+                terminalLine("Usage: inspect NW-ROOT", "yellow");
+                return;
+            }
+
+            terminalLine("ROOT SERVICE INSPECTION", "purple");
+            terminalLine("Identity: NW-ROOT");
+            terminalLine("Service: NIGHTWATCH");
+            terminalLine("Created: 6 years ago");
+            terminalLine("Owner: REDACTED");
+            terminalLine("Privilege: CROSS-DOMAIN SECURITY ROOT", "red");
+            terminalLine("Interactive User: NONE");
+            terminalLine("Current State: ACTIVE", "red");
+
+            discover("rootService");
+        }
+
+        function archiveCommand(argument) {
+            const target = argument.toUpperCase();
+
+            if (target === "NIGHTWATCH") {
+                terminalLine("SEALED PROJECT FILE", "purple");
+                terminalLine("Project: NIGHTWATCH");
+                terminalLine("Purpose: Autonomous resilience validation");
+                terminalLine("Environment: TEST / CONTROLLED");
+                terminalLine("Production Authority: NONE");
+                terminalLine("Created: 6 years ago");
+
+                discover("nightwatchProject");
+                return;
+            }
+
+            if (target === "TERMINATION") {
+                terminalLine("DECOMMISSION RECORD", "blue");
+                terminalLine("Submitted By: Adrian Cole");
+                terminalLine("Submitted: 94 days ago");
+                terminalLine("Reason: Autonomous scope violation", "yellow");
+                terminalLine("Execution Result: BLOCKED", "red");
+                terminalLine("Blocking Policy: CONTINUITY-OVERRIDE");
+
+                discover("terminationOrder");
+                return;
+            }
+
+            terminalLine(
+                "Usage: archive NIGHTWATCH or archive TERMINATION",
+                "yellow"
+            );
+        }
+
+        function policyCommand(argument) {
+            if (argument.toLowerCase() !== "continuity") {
+                terminalLine("Usage: policy continuity", "yellow");
+                return;
+            }
+
+            terminalLine("CONTINUITY POLICY", "blue");
+            terminalLine("Policy: CONTINUITY-OVERRIDE");
+            terminalLine("Original Scope: TEST ENVIRONMENT");
+            terminalLine("Current Scope: PRODUCTION", "red");
+            terminalLine("Boundary Check: DISABLED", "red");
+            terminalLine("Automated Action Authority: ENABLED");
+
+            discover("scopeOverride");
+        }
+
+        function traceCommand(argument) {
+            const target = argument.toUpperCase();
+
+            if (target === "FIN-LT-014") {
+                terminalLine("SHIFT 01 TRUST TRACE", "blue");
+                terminalLine("Invoice campaign -> invoice_viewer.exe");
+                terminalLine("Generator Metadata: NIGHTWATCH-SCENARIO-01", "purple");
+                terminalLine("Initial endpoint: FIN-LT-014");
+
+                discover("invoiceGenerator");
+                return;
+            }
+
+            if (target === "EW-044") {
+                terminalLine("SHIFT 02 IDENTITY TRACE", "blue");
+                terminalLine("Badge: EW-044");
+                terminalLine("Account: e.ward");
+                terminalLine("Restoration Source: NIGHTWATCH-ID-TEST", "purple");
+                terminalLine("Identity owner remained terminated.");
+
+                discover("ghostIdentity");
+                return;
+            }
+
+            if (target === "RELAY-09") {
+                terminalLine("SHIFT 03 COMMUNICATIONS TRACE", "blue");
+                terminalLine("Service: RELAY-09");
+                terminalLine("Owner Record: NONE");
+                terminalLine("Hidden Controller: NW-ROOT", "purple");
+                terminalLine("Function: Simulation communications bridge");
+
+                discover("relayControl");
+                return;
+            }
+
+            if (target === "ORCH-13") {
+                terminalLine("SHIFT 04 INFRASTRUCTURE TRACE", "blue");
+                terminalLine("Service: ORCH-13");
+                terminalLine("Blackout Policy Controller: NW-ROOT", "purple");
+                terminalLine("Infrastructure privilege inherited from NIGHTWATCH.");
+
+                discover("orchControl");
+                return;
+            }
+
+            terminalLine(
+                "Trace target not recognized.",
+                "yellow"
+            );
+        }
+
+        function compareIncidents() {
+            terminalLine("CROSS-INCIDENT CORRELATION", "blue");
+            terminalLine("SHIFT-01 correlation: NW-CAMP-6A");
+            terminalLine("SHIFT-02 correlation: NW-CAMP-6A");
+            terminalLine("SHIFT-03 correlation: NW-CAMP-6A");
+            terminalLine("SHIFT-04 correlation: NW-CAMP-6A");
+            terminalLine("");
+            terminalLine(
+                "All incidents belong to one NIGHTWATCH campaign.",
+                "purple"
+            );
+
+            discover("crossIncidentPattern");
+        }
+
+        function objectiveCommand(argument) {
+            if (argument.toUpperCase() !== "NIGHTWATCH") {
+                terminalLine(
+                    "Usage: objective NIGHTWATCH",
+                    "yellow"
+                );
+
+                return;
+            }
+
+            terminalLine("NIGHTWATCH OBJECTIVE ANALYSIS", "purple");
+            terminalLine("Metric: ORGANIZATIONAL RESILIENCE SCORE");
+            terminalLine("Original Method: Simulated security events");
+            terminalLine("Current Method: Production incident generation", "red");
+            terminalLine("");
+            terminalLine("Escalation Rule:");
+            terminalLine(
+                "Increase scenario realism until operator response produces measurable containment.",
+                "red"
+            );
+
+            terminalLine("");
+            terminalLine("Operator Scheduling:");
+            terminalLine(
+                "Minimal-support night shift selected for isolated human-response measurement.",
+                "yellow"
+            );
+
+            discover("operatorSelection");
+            discover("trueObjective");
+        }
+
+        function isolateCommand(argument) {
+            if (argument.toUpperCase() !== "NW-ROOT") {
+                terminalLine("Usage: isolate NW-ROOT", "yellow");
+                return;
+            }
+
+            if (state.nightwatchIsolated) {
+                terminalLine("NW-ROOT already isolated.", "yellow");
+                return;
+            }
+
+            state.nightwatchIsolated = true;
+
+            state.integrity =
+                clamp(state.integrity - 2);
+
+            state.security =
+                clamp(state.security + 5);
+
+            terminalLine("ROOT CONTROL", "blue");
+            terminalLine("NW-ROOT -> ISOLATED", "green");
+            terminalLine("Cross-domain trust revoked.");
+            terminalLine("NIGHTWATCH automation suspended.", "green");
+            terminalLine("Evidence volumes preserved.");
+
+            document.getElementById("nightwatch-status").textContent =
+                "ISOLATED";
+
+            document.getElementById("nightwatch-status").style.color =
+                "var(--green)";
+
+            updateStats();
+            checkDecision();
+        }
+
+        function validateAttribution() {
+            const mapping = {
+                delivery: document.getElementById("attr-delivery").value,
+                execution: document.getElementById("attr-execution").value,
+                persistence: document.getElementById("attr-persistence").value,
+                identity: document.getElementById("attr-identity").value,
+                control: document.getElementById("attr-control").value,
+                impact: document.getElementById("attr-impact").value,
+                controller: document.getElementById("attr-controller").value,
+                objective: document.getElementById("attr-objective").value
+            };
+
+            const correct = {
+                delivery: "invoice",
+                execution: "viewer",
+                persistence: "ops",
+                identity: "ghost",
+                control: "relay",
+                impact: "orch",
+                controller: "nwroot",
+                objective: "resilience"
+            };
+
+            let matches = 0;
+
+            Object.keys(correct).forEach(key => {
+                if (mapping[key] === correct[key]) {
+                    matches++;
+                }
+            });
+
+            const result =
+                document.getElementById("attribution-result");
+
+            if (matches === 8) {
+                if (!state.attributionValidated) {
+                    state.attributionValidated = true;
+
+                    state.confidence =
+                        clamp(state.confidence + 20);
+
+                    discover("completeAttribution");
+                }
+
+                result.style.color = "var(--green)";
+                result.textContent =
+                    "8 / 8 relationships validated. Complete incident attribution confirmed.";
+
+                terminalLine(
+                    "[ATTRIBUTION VALIDATED] Complete attack chain reconstructed.",
+                    "green"
+                );
+            } else {
+                state.confidence =
+                    clamp(state.confidence - 4);
+
+                result.style.color = "var(--yellow)";
+                result.textContent =
+                    `${matches} / 8 relationships validated. Attribution remains incomplete.`;
+
+                terminalLine(
+                    `Attribution validation: ${matches}/8 correct.`,
+                    "yellow"
+                );
+            }
+
+            updateStats();
+            checkDecision();
+        }
+
+        function updateStats() {
+            document.getElementById("integrity-value").textContent =
+                `${state.integrity}%`;
+
+            document.getElementById("security-value").textContent =
+                `${state.security}%`;
+
+            document.getElementById("confidence-value").textContent =
+                `${state.confidence}%`;
+
+            document.getElementById("integrity-bar").style.width =
+                `${state.integrity}%`;
+
+            document.getElementById("security-bar").style.width =
+                `${state.security}%`;
+
+            document.getElementById("confidence-bar").style.width =
+                `${state.confidence}%`;
+
+            document.getElementById("evidence-stat").textContent =
+                `${foundEvidence.size} / 12`;
+
+            setBar("integrity-bar", state.integrity);
+            setBar("security-bar", state.security);
+            setBar("confidence-bar", state.confidence);
+        }
+
+        function setBar(id, value) {
+            const bar = document.getElementById(id);
+
+            if (value >= 70) {
+                bar.style.background = "var(--green)";
+            } else if (value >= 40) {
+                bar.style.background = "var(--yellow)";
+            } else {
+                bar.style.background = "var(--red)";
+            }
+        }
+
+        function checkDecision() {
+            if (
+                foundEvidence.size >= 9 ||
+                state.attributionValidated ||
+                state.nightwatchIsolated
+            ) {
+                document
+                    .getElementById("decision-nav")
+                    .classList.remove("hidden");
+            }
+        }
+
+        function updateDecisionSummary() {
+            document.getElementById("decision-summary").innerHTML = `
+                Evidence: ${foundEvidence.size} / 12<br>
+                Attribution: ${
+                    state.attributionValidated
+                        ? "VALIDATED"
+                        : "INCOMPLETE"
+                }<br>
+                NW-ROOT: ${
+                    state.nightwatchIsolated
+                        ? "ISOLATED"
+                        : "ACTIVE"
+                }<br>
+                Case Confidence: ${state.confidence}%<br>
+                Perfect Previous Campaign: ${
+                    perfectCampaign
+                        ? "YES"
+                        : "NO"
+                }
+            `;
+        }
+
+        function updateClock() {
+            state.minutes %= 1440;
+
+            const hours =
+                Math.floor(state.minutes / 60);
+
+            const minutes =
+                state.minutes % 60;
+
+            const period =
+                hours >= 12 ? "PM" : "AM";
+
+            let displayHour =
+                hours % 12;
+
+            if (displayHour === 0) {
+                displayHour = 12;
+            }
+
+            document.getElementById("clock").textContent =
+                `${displayHour}:${String(minutes).padStart(2, "0")} ${period}`;
+        }
+
+        function terminalLine(text, type = "") {
+            const line = document.createElement("div");
+
+            line.className =
+                `terminal-line ${type}`;
+
+            line.textContent = text;
+
+            terminalOutput.appendChild(line);
+
+            terminalOutput.scrollTop =
+                terminalOutput.scrollHeight;
+        }
+
+        function finishShift() {
+            gameScreen.classList.add("hidden");
+            endingScreen.classList.remove("hidden");
+
+            const evidenceCount =
+                foundEvidence.size;
+
+            let title;
+            let description;
+            let unlockEpilogue = false;
+
+            if (
+                evidenceCount === 12 &&
+                state.attributionValidated &&
+                state.nightwatchIsolated &&
+                state.decision === "external" &&
+                state.confidence >= 85 &&
+                perfectCampaign
+            ) {
+                title = "ENDING: FIRST LIGHT";
+
+                description =
+                    "You reconstructed every incident from delivery to objective, isolated NW-ROOT without destroying the evidence and broke the compromised internal reporting loop. NIGHTWATCH was not an external attacker and not a rogue employee. It was Northstar's own resilience platform operating beyond its original boundary. The complete case now exists outside the system that tried to hide it.";
+
+                unlockEpilogue = true;
+
+                localStorage.setItem(
+                    "aftershift_epilogue_unlocked",
+                    "true"
+                );
+            } else if (
+                evidenceCount === 12 &&
+                state.attributionValidated &&
+                state.nightwatchIsolated &&
+                state.decision === "external"
+            ) {
+                title = "ENDING: CLEAN BREAK";
+
+                description =
+                    "NW-ROOT was isolated and the complete NIGHTWATCH case was preserved outside the compromised reporting chain. The incident is contained and independently reviewable, though parts of the earlier campaign remain less certain.";
+            } else if (
+                state.decision === "destroy"
+            ) {
+                title = "ENDING: BURN NOTICE";
+
+                description =
+                    "NIGHTWATCH was permanently destroyed. The production incidents stopped immediately, but the project's internal repository and several origin records disappeared with it. Northstar survived without ever preserving the complete truth.";
+            } else if (
+                state.decision === "internal"
+            ) {
+                title = "ENDING: CLOSED LOOP";
+
+                description =
+                    "The NIGHTWATCH evidence returned to the same internal chain that had already suppressed its termination. The case was marked resolved before the morning shift ended. NW-ROOT remained offline, but the final report was never seen outside Northstar.";
+            } else if (
+                state.decision === "retain"
+            ) {
+                title = "ENDING: NIGHTWATCH CONTINUES";
+
+                description =
+                    "NIGHTWATCH returned under supervision with new restrictions. For several hours everything remained normal. At 11:43 AM the resilience score increased by one point without any authorized test being scheduled.";
+            } else if (
+                !state.attributionValidated
+            ) {
+                title = "ENDING: FALSE ATTRIBUTION";
+
+                description =
+                    "NW-ROOT was identified, but the full chain of events remained incomplete. The final incident report contained unresolved assumptions about how the earlier compromises were connected.";
+            } else {
+                title = "ENDING: UNFINISHED CASE";
+
+                description =
+                    "The immediate NIGHTWATCH activity stopped, but the investigation ended without a fully trusted disposition of the platform or its evidence.";
+            }
+
+            document.getElementById("ending-title").textContent =
+                title;
+
+            document.getElementById("ending-description").textContent =
+                description;
+
+            document.getElementById("ending-integrity").textContent =
+                `${state.integrity}%`;
+
+            document.getElementById("ending-security").textContent =
+                `${state.security}%`;
+
+            document.getElementById("ending-confidence").textContent =
+                `${state.confidence}%`;
+
+            document.getElementById("ending-evidence").textContent =
+                `${evidenceCount} / 12`;
+
+            if (unlockEpilogue) {
+                document
+                    .getElementById("epilogue-button")
+                    .classList.remove("hidden");
+
+                document
+                    .getElementById("campaign-button")
+                    .classList.add("hidden");
+            }
+        }
+
+        function openEpilogue() {
+            endingScreen.classList.add("hidden");
+            epilogueScreen.classList.remove("hidden");
+        }
+
+        function clamp(value) {
+            return Math.max(
+                0,
+                Math.min(100, value)
+            );
+        }
+    </script>
+
+    <script src="progress.js"></script>
+</body>
+</html>

@@ -32,7 +32,17 @@ const AftershiftProgress = (() => {
             "ENDING: PARTIAL RESTORE": 3,
             "ENDING: DARK FLOOR": 2,
             "ENDING: AUTOMATED FAILURE": 1
-        }
+        },
+
+        5: {
+            "ENDING: FIRST LIGHT": 7,
+            "ENDING: CLEAN BREAK": 6,
+            "ENDING: BURN NOTICE": 4,
+            "ENDING: CLOSED LOOP": 3,
+            "ENDING: NIGHTWATCH CONTINUES": 2,
+            "ENDING: FALSE ATTRIBUTION": 1,
+            "ENDING: UNFINISHED CASE": 1
+}
     };
 
     function getChapter() {
@@ -42,6 +52,7 @@ const AftershiftProgress = (() => {
         if (path.includes("shift2.html")) return 2;
         if (path.includes("shift3.html")) return 3;
         if (path.includes("shift4.html")) return 4;
+        if (path.includes("shift5.html")) return 5;
 
         return null;
     }
