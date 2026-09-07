@@ -2425,6 +2425,20 @@
                 Math.min(100, value)
             );
         }
+
+        const epilogueRequest =
+            new URLSearchParams(window.location.search).get("epilogue");
+
+        if (
+            epilogueRequest === "1" &&
+            localStorage.getItem("aftershift_epilogue_unlocked") === "true"
+        ) {
+            startScreen.classList.add("hidden");
+            gameScreen.classList.add("hidden");
+            endingScreen.classList.add("hidden");
+            epilogueScreen.classList.remove("hidden");
+        }
+
     </script>
 
     <script src="progress.js"></script>
