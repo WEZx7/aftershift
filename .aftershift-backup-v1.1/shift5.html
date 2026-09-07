@@ -818,7 +818,7 @@
                 OPEN NIGHTWATCH CASE
             </button>
 
-            <p class="version">BUILD 1.1 // FINAL CAMPAIGN CHAPTER</p>
+            <p class="version">BUILD 1.0 // FINAL CAMPAIGN CHAPTER</p>
         </div>
     </section>
 
@@ -829,7 +829,7 @@
                 <small>SHIFT 5 // THE LAST SHIFT</small>
             </div>
 
-            <div id="clock" dir="ltr">04:49 AM</div>
+            <div id="clock">04:49 AM</div>
         </header>
 
         <div class="layout">
@@ -2253,27 +2253,25 @@
         }
 
         function updateDecisionSummary() {
-            const arabic =
-                document.documentElement.lang === "ar" ||
-                window.AftershiftSettings?.get?.().language === "ar";
-
-            const summary = document.getElementById("decision-summary");
-
-            summary.innerHTML = arabic
-                ? `
-                    الأدلة: ${foundEvidence.size} / 12<br>
-                    الإسناد: ${state.attributionValidated ? "تم التحقق" : "غير مكتمل"}<br>
-                    NW-ROOT: ${state.nightwatchIsolated ? "معزول" : "نشط"}<br>
-                    ثقة القضية: ${state.confidence}%<br>
-                    الحملة السابقة المثالية: ${perfectCampaign ? "نعم" : "لا"}
-                `
-                : `
-                    Evidence: ${foundEvidence.size} / 12<br>
-                    Attribution: ${state.attributionValidated ? "VALIDATED" : "INCOMPLETE"}<br>
-                    NW-ROOT: ${state.nightwatchIsolated ? "ISOLATED" : "ACTIVE"}<br>
-                    Case Confidence: ${state.confidence}%<br>
-                    Perfect Previous Campaign: ${perfectCampaign ? "YES" : "NO"}
-                `;
+            document.getElementById("decision-summary").innerHTML = `
+                Evidence: ${foundEvidence.size} / 12<br>
+                Attribution: ${
+                    state.attributionValidated
+                        ? "VALIDATED"
+                        : "INCOMPLETE"
+                }<br>
+                NW-ROOT: ${
+                    state.nightwatchIsolated
+                        ? "ISOLATED"
+                        : "ACTIVE"
+                }<br>
+                Case Confidence: ${state.confidence}%<br>
+                Perfect Previous Campaign: ${
+                    perfectCampaign
+                        ? "YES"
+                        : "NO"
+                }
+            `;
         }
 
         function updateClock() {
@@ -2295,12 +2293,7 @@
                 displayHour = 12;
             }
 
-            const clockElement = document.getElementById("clock");
-
-            clockElement.dir = "ltr";
-            clockElement.style.direction = "ltr";
-            clockElement.style.unicodeBidi = "isolate";
-            clockElement.textContent =
+            document.getElementById("clock").textContent =
                 `${displayHour}:${String(minutes).padStart(2, "0")} ${period}`;
         }
 

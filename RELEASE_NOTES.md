@@ -1,57 +1,37 @@
-# AFTERSHIFT v1.0.0 — First Light
+# AFTERSHIFT v1.1.0 — Immersion Update
 
-The first complete release of AFTERSHIFT.
+AFTERSHIFT v1.1 is the launch-ready immersion and localization update for the complete five-chapter campaign.
 
-AFTERSHIFT is an interactive IT support and cybersecurity investigation game built entirely with HTML, CSS, and JavaScript.
+## Added
+
+- Arabic interface localization with RTL layout support
+- Technical identifiers and Terminal commands remain LTR
+- Procedural Web Audio ambience with a different profile for each shift
+- Terminal, evidence, alert, blackout, success and failure sound cues
+- Master volume, ambience and SFX controls
+- Northstar Green, SOC Ice, Amber Ops and Adaptive Shift themes
+- Unlockable NIGHTWATCH theme after the sealed epilogue
+- Reduced Motion accessibility option
+- Persistent language, audio and theme settings using localStorage
+
+## Polish
+
+- Shift 1 evidence total corrected to 12 / 12
+- Campaign build metadata updated to 1.1
+- Arabic fallback keeps intentionally untranslated technical text readable in LTR
+- Development hotfix files removed from the launch package
 
 ## Campaign
 
-The complete five-chapter campaign is now available:
+1. The First Incident
+2. The Ghost Account
+3. Dead Channel
+4. Blackout Protocol
+5. The Last Shift
 
-- Shift 1 — The First Incident
-- Shift 2 — The Ghost Account
-- Shift 3 — Dead Channel
-- Shift 4 — Blackout Protocol
-- Shift 5 — The Last Shift
-
-## Features
-
-- Interactive investigation terminal
-- Help desk and endpoint troubleshooting
-- Evidence collection
-- Network and authentication investigation
-- Email and phishing analysis
-- Identity verification
-- Infrastructure recovery
-- Attack timeline reconstruction
-- Attribution system
-- Multiple endings
-- Persistent campaign saves
-- Chapter Select
-- Case Archive
-- Operator Manual
-- First-time tutorial
-- Hint system
-- Mobile support
-- Secret ending
-- Sealed epilogue
-
-## True Ending
-
-Players who fully investigate the campaign can unlock the final ending and sealed DAYBREAK epilogue.
+True ending: **FIRST LIGHT**
+Sealed epilogue: **DAYBREAK**
 
 ## Play
 
 https://wezx7.github.io/aftershift/
-
-## Technology
-
-Built with:
-
-- HTML
-- CSS
-- JavaScript
-- Browser Local Storage
-- GitHub Pages
-
-No frameworks and no installation required.

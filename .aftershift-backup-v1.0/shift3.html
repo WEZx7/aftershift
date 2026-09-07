@@ -735,7 +735,6 @@
             }
         }
     </style>
-    <link rel="stylesheet" href="aftershift-immersion.css">
 </head>
 
 <body>
@@ -771,7 +770,7 @@
                 BEGIN SHIFT 3
             </button>
 
-            <p class="version">BUILD 1.1 // CAMPAIGN CHAPTER 03</p>
+            <p class="version">BUILD 0.5 // CAMPAIGN CHAPTER 03</p>
         </div>
     </section>
 
@@ -782,7 +781,7 @@
                 <small>SHIFT 3 // DEAD CHANNEL</small>
             </div>
 
-            <div id="clock" dir="ltr">03:12 AM</div>
+            <div id="clock">03:12 AM</div>
         </header>
 
         <div class="layout">
@@ -1437,19 +1436,10 @@
         function unlockDecision() {
             document.getElementById("decision-nav").classList.remove("hidden");
 
-            const arabic =
-                document.documentElement.lang === "ar" ||
-                window.AftershiftSettings?.get?.().language === "ar";
-
-            const summary = document.getElementById("decision-summary");
-
-            summary.textContent = arabic
-                ? `تم اكتشاف ${foundEvidence.size} من أصل 8 أدلة. ` +
-                  `حالة RELAY-09: ${state.relayIsolated ? "معزول" : "لا يزال نشطًا"}. ` +
-                  `تم ${state.lenaVerified ? "التحقق" : "عدم التحقق"} من هوية Lena Park.`
-                : `${foundEvidence.size} of 8 evidence items discovered. ` +
-                  `RELAY-09 is ${state.relayIsolated ? "isolated" : "still active"}. ` +
-                  `Lena Park identity is ${state.lenaVerified ? "verified" : "unverified"}.`;
+            document.getElementById("decision-summary").textContent =
+                `${foundEvidence.size} of 8 evidence items discovered. ` +
+                `RELAY-09 is ${state.relayIsolated ? "isolated" : "still active"}. ` +
+                `Lena Park identity is ${state.lenaVerified ? "verified" : "unverified"}.`;
         }
 
         function runCommand(raw) {
@@ -1794,12 +1784,7 @@
                 displayHour = 12;
             }
 
-            const clockElement = document.getElementById("clock");
-
-            clockElement.dir = "ltr";
-            clockElement.style.direction = "ltr";
-            clockElement.style.unicodeBidi = "isolate";
-            clockElement.textContent =
+            document.getElementById("clock").textContent =
                 `${displayHour}:${String(minutes).padStart(2, "0")} ${period}`;
         }
 
@@ -1901,9 +1886,5 @@
     </script>
     <script src="progress.js"></script>
     <script src="onboarding.js"></script>
-    <script src="aftershift-i18n.js"></script>
-    <script src="aftershift-audio.js"></script>
-    <script src="aftershift-settings.js"></script>
-    <script src="aftershift-immersion.js"></script>
 </body>
 </html>

@@ -181,6 +181,20 @@ Saved information includes:
 
 Starting a New Game resets AFTERSHIFT progress stored in that browser.
 
+
+## v1.1 — Immersion Update
+
+AFTERSHIFT now includes:
+
+- English / Arabic interface switching with RTL support
+- Terminal commands kept in LTR for technical readability
+- Procedural per-shift ambience and event sound effects
+- Master volume, ambience and SFX controls
+- Northstar Green, SOC Ice, Amber Ops and Adaptive Shift themes
+- Unlockable NIGHTWATCH theme after the sealed epilogue
+- Reduced Motion accessibility setting
+- Local persistence for language, audio and theme preferences
+
 ## Screenshots
 
 ### Campaign

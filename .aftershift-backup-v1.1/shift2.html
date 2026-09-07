@@ -744,7 +744,7 @@
                 BEGIN SHIFT 2
             </button>
 
-            <p class="version">BUILD 1.1 // CAMPAIGN CHAPTER 02</p>
+            <p class="version">BUILD 0.4 // CAMPAIGN CHAPTER 02</p>
         </div>
     </section>
 
@@ -755,7 +755,7 @@
                 <small>SHIFT 2 // NORTHSTAR OPERATIONS</small>
             </div>
 
-            <div id="clock" dir="ltr">02:03 AM</div>
+            <div id="clock">02:03 AM</div>
         </header>
 
         <div class="game-layout">
@@ -1859,12 +1859,7 @@
                 displayHour = 12;
             }
 
-            const clockElement = document.getElementById("clock");
-
-            clockElement.dir = "ltr";
-            clockElement.style.direction = "ltr";
-            clockElement.style.unicodeBidi = "isolate";
-            clockElement.textContent =
+            document.getElementById("clock").textContent =
                 `${displayHour}:${String(minutes).padStart(2, "0")} ${period}`;
         }
 

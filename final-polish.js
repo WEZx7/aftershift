@@ -13,7 +13,7 @@
 
     if (version) {
         version.innerHTML = `
-            CAMPAIGN BUILD 1.0<br>
+            CAMPAIGN BUILD 1.1<br>
             OPERATOR PROFILE: LOCAL<br>
             SAVE SYSTEM: ACTIVE
         `;

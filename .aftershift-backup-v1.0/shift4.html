@@ -772,7 +772,6 @@
             }
         }
     </style>
-    <link rel="stylesheet" href="aftershift-immersion.css">
 </head>
 
 <body>
@@ -832,7 +831,7 @@
                 INITIATE BLACKOUT PROTOCOL
             </button>
 
-            <p class="version">BUILD 1.1 // CAMPAIGN CHAPTER 04</p>
+            <p class="version">BUILD 0.8 // CAMPAIGN CHAPTER 04</p>
         </div>
     </section>
 
@@ -848,7 +847,7 @@
                     BACKUP // 18 MIN
                 </div>
 
-                <div id="clock" dir="ltr">04:06 AM</div>
+                <div id="clock">04:06 AM</div>
             </div>
         </header>
 
@@ -2284,29 +2283,24 @@
                         service.status === "RESTORED"
                 ).length;
 
-            const arabic =
-                document.documentElement.lang === "ar" ||
-                window.AftershiftSettings?.get?.().language === "ar";
-
-            const summary = document.getElementById("protocol-summary");
-
-            summary.innerHTML = arabic
-                ? `
-                    الأدلة: ${foundEvidence.size} / 8<br>
-                    الخدمات المستعادة: ${restored} / 5<br>
-                    الخدمات الحرجة المستعادة: ${critical} / 3<br>
-                    ORCH-13: ${state.orchIsolated ? "معزول" : "نشط"}<br>
-                    MANUAL-BUS: ${state.manualBus ? "متصل" : "غير متصل"}<br>
-                    احتياطي الطاقة: ${state.reserve} دقائق
-                `
-                : `
-                    Evidence: ${foundEvidence.size} / 8<br>
-                    Services Restored: ${restored} / 5<br>
-                    Critical Services Restored: ${critical} / 3<br>
-                    ORCH-13: ${state.orchIsolated ? "ISOLATED" : "ACTIVE"}<br>
-                    MANUAL-BUS: ${state.manualBus ? "ONLINE" : "OFFLINE"}<br>
-                    Backup Reserve: ${state.reserve} minutes
-                `;
+            document.getElementById(
+                "protocol-summary"
+            ).innerHTML = `
+                Evidence: ${foundEvidence.size} / 8<br>
+                Services Restored: ${restored} / 5<br>
+                Critical Services Restored: ${critical} / 3<br>
+                ORCH-13: ${
+                    state.orchIsolated
+                        ? "ISOLATED"
+                        : "ACTIVE"
+                }<br>
+                MANUAL-BUS: ${
+                    state.manualBus
+                        ? "ONLINE"
+                        : "OFFLINE"
+                }<br>
+                Backup Reserve: ${state.reserve} minutes
+            `;
         }
 
         function updateClock() {
@@ -2330,12 +2324,9 @@
                 displayHour = 12;
             }
 
-            const clockElement = document.getElementById("clock");
-
-            clockElement.dir = "ltr";
-            clockElement.style.direction = "ltr";
-            clockElement.style.unicodeBidi = "isolate";
-            clockElement.textContent =
+            document.getElementById(
+                "clock"
+            ).textContent =
                 `${displayHour}:${String(minutes).padStart(2, "0")} ${period}`;
         }
 
@@ -2477,9 +2468,5 @@
     </script>
 
     <script src="progress.js"></script>
-    <script src="aftershift-i18n.js"></script>
-    <script src="aftershift-audio.js"></script>
-    <script src="aftershift-settings.js"></script>
-    <script src="aftershift-immersion.js"></script>
 </body>
 </html>

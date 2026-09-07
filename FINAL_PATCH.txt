@@ -1,0 +1,15 @@
+AFTERSHIFT v1.1 — Final Launch Patch
+
+This patch only replaces shift1.html through shift5.html.
+
+Fixes:
+- Keeps all live clocks LTR in Arabic mode (e.g. 2:25 AM).
+- Localizes the Shift 3 Final Decision status sentence.
+- Localizes the Shift 4 Final Protocol status block.
+- Localizes the Shift 5 Final Decision status block.
+- English mode remains unchanged.
+
+Install from the repository root:
+  unzip -o AFTERSHIFT-v1.1-LAUNCH-PATCH.zip
+
+Then test and delete the zip.
