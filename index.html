@@ -787,7 +787,7 @@
             {
                 number: 4,
                 title: "Blackout Protocol",
-                file: null,
+                file: "shift4.html",
                 description:
                     "Infrastructure failure spreads across Northstar. Restore critical services while the attacker exploits the blackout."
             },
@@ -810,7 +810,8 @@
         const caseNames = {
             1: "CASE NS-011 // UNKNOWN-7F2",
             2: "CASE NS-032 // GHOST ACCOUNT",
-            3: "CASE NS-044 // DEAD CHANNEL"
+            3: "CASE NS-044 // DEAD CHANNEL",
+            4: "CASE NS-061 // BLACKOUT PROTOCOL"
         };
 
         const caseDescriptions = {
@@ -821,7 +822,10 @@
                 "Recurring device identities, terminated credentials, physical access anomalies and suppressed incident history.",
 
             3:
-                "Synthetic voice traffic, message injection, session replay and unauthorized communications relay activity."
+                "Synthetic voice traffic, message injection, session replay and unauthorized communications relay activity.",
+
+            4:
+                "Coordinated infrastructure shutdown, emergency automation abuse, altered UPS policy and internal recovery sabotage."
         };
 
         function cleanEnding(ending) {
@@ -836,18 +840,19 @@
             if (number === 1) return true;
             if (number === 2) return AftershiftProgress.isComplete(1);
             if (number === 3) return AftershiftProgress.isComplete(2);
+            if (number === 4) return AftershiftProgress.isComplete(3);
 
             return false;
         }
 
         function firstIncompleteChapter() {
-            for (let i = 1; i <= 3; i++) {
+            for (let i = 1; i <= 4; i++) {
                 if (!AftershiftProgress.isComplete(i)) {
                     return i;
                 }
             }
 
-            return 4;
+         return 5;
         }
 
         function renderProgress() {
@@ -856,7 +861,7 @@
 
             chapters.forEach(chapter => {
                 const complete =
-                    chapter.number <= 3 &&
+                    chapter.number <= 4 &&
                     AftershiftProgress.isComplete(chapter.number);
 
                 const unlocked = chapterUnlocked(chapter.number);
@@ -870,7 +875,7 @@
                 if (complete) {
                     statusClass = "complete";
                     statusText = "COMPLETE";
-                } else if (unlocked && chapter.number <= 3) {
+                } else if (unlocked && chapter.number <= 4) {
                     statusClass = "current";
                     statusText = "AVAILABLE";
                 }
@@ -912,7 +917,7 @@
             const label =
                 document.getElementById("continue-label");
 
-            if (next <= 3) {
+            if (next <= 4) {
                 label.textContent = `SHIFT ${next}`;
 
                 continueButton.disabled = false;
@@ -939,7 +944,7 @@
                     chapter.file;
 
                 const complete =
-                    chapter.number <= 3 &&
+                    chapter.number <= 4 &&
                     AftershiftProgress.isComplete(chapter.number);
 
                 const card =
@@ -1008,7 +1013,7 @@
 
             container.innerHTML = "";
 
-            for (let chapter = 1; chapter <= 3; chapter++) {
+            for (let chapter = 1; chapter <= 4; chapter++) {
                 const complete =
                     AftershiftProgress.isComplete(chapter);
 

@@ -1,0 +1,2472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AFTERSHIFT // SHIFT 4</title>
+
+    <style>
+        :root {
+            --bg: #050809;
+            --panel: #091011;
+            --panel2: #0d1516;
+            --border: #263332;
+            --text: #d9dfdc;
+            --muted: #7f8d88;
+            --green: #66efb2;
+            --blue: #6fd8ff;
+            --yellow: #ecc66c;
+            --red: #ff6b6b;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: var(--bg);
+            color: var(--text);
+            font-family: "Courier New", monospace;
+        }
+
+        button,
+        input {
+            font: inherit;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .scanlines {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 999;
+            opacity: 0.045;
+            background: repeating-linear-gradient(
+                to bottom,
+                transparent 0,
+                transparent 2px,
+                white 3px,
+                transparent 4px
+            );
+        }
+
+        #start-screen {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+            background:
+                radial-gradient(circle at center, #21190c 0%, #050809 58%);
+        }
+
+        .briefing {
+            width: min(820px, 100%);
+            border: 1px solid var(--border);
+            background: rgba(5, 8, 9, 0.97);
+            padding: 45px;
+        }
+
+        .label {
+            color: var(--green);
+            letter-spacing: 3px;
+            font-size: 10px;
+        }
+
+        .briefing h1 {
+            font-size: clamp(52px, 9vw, 88px);
+            margin: 12px 0 0;
+            letter-spacing: -4px;
+        }
+
+        .briefing h2 {
+            margin-top: 5px;
+            color: var(--muted);
+            font-weight: normal;
+        }
+
+        .emergency {
+            margin: 32px 0;
+            border-left: 2px solid var(--red);
+            background: #0a0e0f;
+            padding: 22px;
+            line-height: 1.8;
+            font-size: 13px;
+            color: #aeb9b5;
+        }
+
+        .emergency strong {
+            color: var(--red);
+        }
+
+        .boot-grid {
+            border: 1px solid var(--border);
+            margin: 25px 0;
+        }
+
+        .boot-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 11px 15px;
+            border-bottom: 1px solid var(--border);
+            font-size: 11px;
+        }
+
+        .boot-row:last-child {
+            border: none;
+        }
+
+        .danger {
+            color: var(--red);
+        }
+
+        .warning {
+            color: var(--yellow);
+        }
+
+        .good {
+            color: var(--green);
+        }
+
+        .primary-button {
+            width: 100%;
+            border: 1px solid var(--green);
+            background: var(--green);
+            color: #03100b;
+            padding: 17px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .primary-button:hover {
+            background: transparent;
+            color: var(--green);
+        }
+
+        .version {
+            text-align: right;
+            color: #46524e;
+            font-size: 9px;
+            margin-top: 15px;
+        }
+
+        header {
+            height: 72px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 24px;
+            border-bottom: 1px solid var(--border);
+            background: #070c0d;
+        }
+
+        .logo {
+            font-size: 21px;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        .logo small {
+            color: var(--muted);
+            font-size: 9px;
+            margin-left: 10px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .reserve-header {
+            color: var(--yellow);
+            font-size: 11px;
+        }
+
+        #clock {
+            font-size: 15px;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 230px 1fr;
+            min-height: calc(100vh - 110px);
+        }
+
+        aside {
+            background: #070c0d;
+            border-right: 1px solid var(--border);
+            padding: 24px 14px;
+        }
+
+        .nav-label {
+            color: var(--green);
+            letter-spacing: 2px;
+            font-size: 9px;
+            margin: 0 12px 15px;
+        }
+
+        .nav {
+            width: 100%;
+            border: 0;
+            border-left: 2px solid transparent;
+            background: transparent;
+            color: var(--muted);
+            padding: 13px;
+            text-align: left;
+            cursor: pointer;
+            margin-bottom: 4px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .nav:hover {
+            background: var(--panel);
+            color: var(--text);
+        }
+
+        .nav.active {
+            background: var(--panel);
+            color: var(--green);
+            border-left-color: var(--green);
+        }
+
+        .nav span {
+            font-size: 9px;
+            background: #14201d;
+            border-radius: 20px;
+            padding: 2px 7px;
+        }
+
+        .operator {
+            margin-top: 35px;
+            border-top: 1px solid var(--border);
+            padding: 20px 10px;
+            color: var(--muted);
+            font-size: 10px;
+            line-height: 1.8;
+        }
+
+        .operator strong {
+            color: var(--text);
+        }
+
+        main {
+            padding: 24px;
+            overflow: auto;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .stat {
+            border: 1px solid var(--border);
+            background: var(--panel);
+            padding: 17px;
+        }
+
+        .stat span {
+            color: var(--muted);
+            font-size: 9px;
+            letter-spacing: 1px;
+        }
+
+        .stat strong {
+            display: block;
+            margin: 8px 0;
+            font-size: 25px;
+        }
+
+        .meter {
+            height: 4px;
+            background: #172020;
+        }
+
+        .meter div {
+            height: 100%;
+            background: var(--green);
+            transition: 0.35s;
+        }
+
+        .view {
+            border: 1px solid var(--border);
+            background: var(--panel);
+        }
+
+        .view-header {
+            padding: 20px 22px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .view-header p {
+            color: var(--green);
+            font-size: 9px;
+            letter-spacing: 2px;
+            margin: 0 0 6px;
+        }
+
+        .view-header h2 {
+            margin: 0;
+            font-size: 23px;
+        }
+
+        .critical-badge {
+            color: var(--red);
+            border: 1px solid var(--red);
+            padding: 6px 10px;
+            font-size: 9px;
+        }
+
+        .grid-layout {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            padding: 20px;
+        }
+
+        .service {
+            border: 1px solid var(--border);
+            background: #080e0f;
+            padding: 18px;
+            position: relative;
+        }
+
+        .service::before {
+            content: "";
+            position: absolute;
+            right: 16px;
+            top: 17px;
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: var(--red);
+        }
+
+        .service.degraded::before {
+            background: var(--yellow);
+        }
+
+        .service.restored::before {
+            background: var(--green);
+        }
+
+        .service.unstable::before {
+            background: var(--yellow);
+            box-shadow: 0 0 12px var(--yellow);
+        }
+
+        .service small {
+            color: var(--muted);
+            font-size: 8px;
+        }
+
+        .service h3 {
+            margin: 10px 0 5px;
+            font-size: 18px;
+        }
+
+        .service p {
+            color: var(--muted);
+            font-size: 10px;
+            line-height: 1.7;
+        }
+
+        .service-status {
+            display: inline-block;
+            margin-top: 10px;
+            font-size: 9px;
+            color: var(--red);
+        }
+
+        .service.restored .service-status {
+            color: var(--green);
+        }
+
+        .service.degraded .service-status,
+        .service.unstable .service-status {
+            color: var(--yellow);
+        }
+
+        .recovery-intro {
+            padding: 18px 22px;
+            border-bottom: 1px solid var(--border);
+            color: var(--muted);
+            font-size: 11px;
+            line-height: 1.8;
+        }
+
+        .recovery-list {
+            padding: 20px;
+            display: grid;
+            gap: 12px;
+        }
+
+        .recovery-item {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            align-items: center;
+            gap: 15px;
+            border: 1px solid var(--border);
+            padding: 17px;
+            background: #080e0f;
+        }
+
+        .recovery-item strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .recovery-item span {
+            color: var(--muted);
+            font-size: 9px;
+            line-height: 1.6;
+        }
+
+        .restore-button {
+            min-width: 140px;
+            border: 1px solid var(--green);
+            background: transparent;
+            color: var(--green);
+            padding: 10px 13px;
+            cursor: pointer;
+        }
+
+        .restore-button:hover:not(:disabled) {
+            background: var(--green);
+            color: #04100c;
+        }
+
+        .restore-button:disabled {
+            border-color: var(--border);
+            color: var(--muted);
+            cursor: not-allowed;
+        }
+
+        .automation-content {
+            padding: 20px;
+        }
+
+        .automation-card {
+            border: 1px solid rgba(255, 107, 107, 0.45);
+            background: #0b0e0f;
+            padding: 20px;
+            margin-bottom: 12px;
+        }
+
+        .automation-card h3 {
+            color: var(--red);
+            margin-top: 0;
+        }
+
+        .automation-card p {
+            color: var(--muted);
+            line-height: 1.8;
+            font-size: 11px;
+        }
+
+        .automation-log {
+            border: 1px solid var(--border);
+            background: #050809;
+            padding: 16px;
+            font-size: 10px;
+            line-height: 1.9;
+            color: #aeb8b4;
+        }
+
+        .terminal {
+            min-height: 570px;
+            background: #030607;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #terminal-output {
+            flex: 1;
+            max-height: 530px;
+            overflow-y: auto;
+        }
+
+        .terminal-line {
+            white-space: pre-wrap;
+            color: #a8b4af;
+            font-size: 12px;
+            line-height: 1.7;
+            margin-bottom: 3px;
+        }
+
+        .terminal-line.green {
+            color: var(--green);
+        }
+
+        .terminal-line.red {
+            color: var(--red);
+        }
+
+        .terminal-line.blue {
+            color: var(--blue);
+        }
+
+        .terminal-line.yellow {
+            color: var(--yellow);
+        }
+
+        .terminal-line.command {
+            color: var(--text);
+        }
+
+        .terminal-input-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-top: 15px;
+            margin-top: 15px;
+            border-top: 1px solid var(--border);
+            color: var(--green);
+        }
+
+        #terminal-input {
+            flex: 1;
+            background: transparent;
+            border: 0;
+            outline: none;
+            color: var(--text);
+        }
+
+        .quick-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .quick-action {
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--blue);
+            padding: 8px 10px;
+            font-size: 9px;
+            cursor: pointer;
+        }
+
+        .quick-action:hover {
+            border-color: var(--green);
+            color: var(--green);
+        }
+
+        .evidence-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            padding: 20px;
+        }
+
+        .evidence {
+            min-height: 145px;
+            border: 1px solid var(--border);
+            padding: 18px;
+        }
+
+        .evidence.locked {
+            opacity: 0.28;
+        }
+
+        .evidence.found {
+            border-color: rgba(102, 239, 178, 0.45);
+        }
+
+        .evidence span {
+            color: var(--green);
+            font-size: 9px;
+            letter-spacing: 1px;
+        }
+
+        .evidence.locked span {
+            color: var(--muted);
+        }
+
+        .evidence h3 {
+            margin: 12px 0 8px;
+            font-size: 17px;
+        }
+
+        .evidence p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 11px;
+            line-height: 1.7;
+        }
+
+        .protocol {
+            padding: 25px;
+        }
+
+        .protocol p {
+            color: var(--muted);
+            line-height: 1.8;
+            font-size: 11px;
+        }
+
+        .protocol-summary {
+            border: 1px solid var(--border);
+            background: #080e0f;
+            padding: 17px;
+            margin: 20px 0;
+            line-height: 1.8;
+            font-size: 11px;
+        }
+
+        .protocol-options {
+            display: grid;
+            gap: 10px;
+        }
+
+        .protocol-button {
+            border: 1px solid var(--border);
+            background: #0b1213;
+            color: var(--text);
+            padding: 17px;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .protocol-button:hover {
+            border-color: var(--green);
+        }
+
+        footer {
+            height: 38px;
+            border-top: 1px solid var(--border);
+            background: #070c0d;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--muted);
+            font-size: 9px;
+        }
+
+        #ending-screen {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+        }
+
+        .ending {
+            width: min(780px, 100%);
+            border: 1px solid var(--border);
+            padding: 42px;
+        }
+
+        .ending h1 {
+            font-size: clamp(42px, 8vw, 68px);
+            margin: 22px 0;
+        }
+
+        .ending > p {
+            color: var(--muted);
+            line-height: 1.9;
+        }
+
+        .ending-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin: 30px 0;
+        }
+
+        .ending-stats div {
+            border: 1px solid var(--border);
+            padding: 14px;
+        }
+
+        .ending-stats span {
+            display: block;
+            color: var(--muted);
+            font-size: 8px;
+        }
+
+        .ending-stats strong {
+            display: block;
+            font-size: 22px;
+            margin-top: 7px;
+        }
+
+        @media (max-width: 850px) {
+            .layout {
+                grid-template-columns: 1fr;
+            }
+
+            aside {
+                border-right: 0;
+                border-bottom: 1px solid var(--border);
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 4px;
+            }
+
+            .nav-label,
+            .operator {
+                display: none;
+            }
+
+            .stats {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 560px) {
+            main {
+                padding: 12px;
+            }
+
+            aside {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .grid-layout,
+            .evidence-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .recovery-item {
+                grid-template-columns: 1fr;
+            }
+
+            .restore-button {
+                width: 100%;
+            }
+
+            .ending-stats {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .briefing {
+                padding: 27px;
+            }
+
+            header {
+                padding: 0 12px;
+            }
+
+            .logo small {
+                display: none;
+            }
+
+            .reserve-header {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="scanlines"></div>
+
+    <section id="start-screen">
+        <div class="briefing">
+            <p class="label">NORTHSTAR SYSTEMS // CRITICAL INFRASTRUCTURE</p>
+
+            <h1>AFTERSHIFT</h1>
+            <h2>SHIFT 4 // BLACKOUT PROTOCOL</h2>
+
+            <div class="emergency">
+                <strong>04:06 AM // CRITICAL INFRASTRUCTURE EVENT</strong><br><br>
+
+                Multiple Northstar services entered emergency shutdown
+                within eleven seconds.<br><br>
+
+                External utility supply:
+                <span class="good">NORMAL</span><br>
+
+                Internal distribution:
+                <span class="danger">FAILING</span><br><br>
+
+                BACKUP POWER RESERVE:
+                <strong>18 MINUTES</strong>
+            </div>
+
+            <div class="boot-grid">
+                <div class="boot-row">
+                    <span>CORE-SRV-01</span>
+                    <span class="danger">OFFLINE</span>
+                </div>
+
+                <div class="boot-row">
+                    <span>AUTH-SVC</span>
+                    <span class="warning">DEGRADED</span>
+                </div>
+
+                <div class="boot-row">
+                    <span>ACCESS-CTRL</span>
+                    <span class="warning">DEGRADED</span>
+                </div>
+
+                <div class="boot-row">
+                    <span>VOICE-GW-01</span>
+                    <span class="danger">OFFLINE</span>
+                </div>
+
+                <div class="boot-row">
+                    <span>FLOOR03-NET</span>
+                    <span class="danger">LOST</span>
+                </div>
+            </div>
+
+            <button id="start-button" class="primary-button">
+                INITIATE BLACKOUT PROTOCOL
+            </button>
+
+            <p class="version">BUILD 0.8 // CAMPAIGN CHAPTER 04</p>
+        </div>
+    </section>
+
+    <section id="game-screen" class="hidden">
+        <header>
+            <div class="logo">
+                AFTERSHIFT
+                <small>SHIFT 4 // BLACKOUT PROTOCOL</small>
+            </div>
+
+            <div class="header-right">
+                <div id="reserve-header" class="reserve-header">
+                    BACKUP // 18 MIN
+                </div>
+
+                <div id="clock">04:06 AM</div>
+            </div>
+        </header>
+
+        <div class="layout">
+            <aside>
+                <p class="nav-label">EMERGENCY SYSTEMS</p>
+
+                <button class="nav active" data-view="grid">
+                    Infrastructure
+                    <span>!</span>
+                </button>
+
+                <button class="nav" data-view="recovery">
+                    Recovery
+                </button>
+
+                <button class="nav" data-view="automation">
+                    Automation
+                    <span>?</span>
+                </button>
+
+                <button class="nav" data-view="terminal">
+                    Terminal
+                </button>
+
+                <button class="nav" data-view="evidence">
+                    Evidence
+                    <span id="evidence-count">0</span>
+                </button>
+
+                <button id="protocol-nav" class="nav hidden" data-view="protocol">
+                    Final Protocol
+                    <span>!</span>
+                </button>
+
+                <div class="operator">
+                    OPERATOR<br>
+                    <strong>Night IT Technician</strong><br>
+                    Emergency Authority: ACTIVE<br><br>
+
+                    Previous Shift:<br>
+                    <span id="previous-result">UNKNOWN</span>
+                </div>
+            </aside>
+
+            <main>
+                <section class="stats">
+                    <div class="stat">
+                        <span>INFRASTRUCTURE</span>
+                        <strong id="infra-value">48%</strong>
+
+                        <div class="meter">
+                            <div id="infra-bar" style="width: 48%"></div>
+                        </div>
+                    </div>
+
+                    <div class="stat">
+                        <span>SECURITY</span>
+                        <strong id="security-value">92%</strong>
+
+                        <div class="meter">
+                            <div id="security-bar" style="width: 92%"></div>
+                        </div>
+                    </div>
+
+                    <div class="stat">
+                        <span>BACKUP RESERVE</span>
+                        <strong id="reserve-value">18m</strong>
+
+                        <div class="meter">
+                            <div id="reserve-bar" style="width: 100%"></div>
+                        </div>
+                    </div>
+
+                    <div class="stat">
+                        <span>EVIDENCE</span>
+                        <strong id="evidence-stat">0 / 8</strong>
+                    </div>
+                </section>
+
+                <section id="grid-view" class="view">
+                    <div class="view-header">
+                        <div>
+                            <p>LIVE INFRASTRUCTURE</p>
+                            <h2>Service Grid</h2>
+                        </div>
+
+                        <span class="critical-badge">BLACKOUT ACTIVE</span>
+                    </div>
+
+                    <div id="service-grid" class="grid-layout"></div>
+                </section>
+
+                <section id="recovery-view" class="view hidden">
+                    <div class="view-header">
+                        <div>
+                            <p>EMERGENCY RECOVERY</p>
+                            <h2>Recovery Queue</h2>
+                        </div>
+                    </div>
+
+                    <div class="recovery-intro">
+                        Restoration consumes backup power. Investigate the outage
+                        before committing reserve capacity. Automatic recovery
+                        remains active.
+                    </div>
+
+                    <div id="recovery-list" class="recovery-list"></div>
+                </section>
+
+                <section id="automation-view" class="view hidden">
+                    <div class="view-header">
+                        <div>
+                            <p>ORCHESTRATION SERVICES</p>
+                            <h2>Automation Control</h2>
+                        </div>
+
+                        <span id="automation-state" class="critical-badge">
+                            ACTIVE
+                        </span>
+                    </div>
+
+                    <div class="automation-content">
+                        <div class="automation-card">
+                            <h3>ORCH-13</h3>
+
+                            <p>
+                                Emergency orchestration service currently holds
+                                authority over service shutdown, startup sequencing,
+                                load distribution and failover policy.
+                            </p>
+
+                            <p>
+                                Owner record:
+                                <strong>UNRESOLVED</strong>
+                            </p>
+                        </div>
+
+                        <div class="automation-log">
+                            04:06:02 // CORE-SRV-01 shutdown requested<br>
+                            04:06:04 // AUTH-SVC power limit applied<br>
+                            04:06:07 // ACCESS-CTRL entered conservation mode<br>
+                            04:06:09 // VOICE-GW-01 shutdown requested<br>
+                            04:06:11 // FLOOR03-NET disconnected<br>
+                            04:06:12 // POLICY SOURCE: ORCH-13
+                        </div>
+                    </div>
+                </section>
+
+                <section id="terminal-view" class="view hidden">
+                    <div class="view-header">
+                        <div>
+                            <p>EMERGENCY SHELL</p>
+                            <h2>Infrastructure Terminal</h2>
+                        </div>
+                    </div>
+
+                    <div class="terminal">
+                        <div id="terminal-output"></div>
+
+                        <div class="terminal-input-row">
+                            <span>aftershift&gt;</span>
+
+                            <input
+                                id="terminal-input"
+                                autocomplete="off"
+                                spellcheck="false"
+                                placeholder="type help"
+                            >
+                        </div>
+
+                        <div class="quick-actions">
+                            <button class="quick-action" data-command="help">
+                                help
+                            </button>
+
+                            <button class="quick-action" data-command="grid status">
+                                grid status
+                            </button>
+
+                            <button class="quick-action" data-command="inspect ORCH-13">
+                                inspect ORCH-13
+                            </button>
+
+                            <button class="quick-action" data-command="logs power">
+                                logs power
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="evidence-view" class="view hidden">
+                    <div class="view-header">
+                        <div>
+                            <p>CASE 04</p>
+                            <h2>Blackout Evidence</h2>
+                        </div>
+
+                        <span id="case-progress">0 / 8</span>
+                    </div>
+
+                    <div id="evidence-grid" class="evidence-grid"></div>
+                </section>
+
+                <section id="protocol-view" class="view hidden">
+                    <div class="view-header">
+                        <div>
+                            <p>EMERGENCY AUTHORITY</p>
+                            <h2>Final Protocol</h2>
+                        </div>
+                    </div>
+
+                    <div class="protocol">
+                        <p>
+                            Northstar cannot remain on backup power indefinitely.
+                            Choose how control should be transferred before the
+                            emergency reserve is exhausted.
+                        </p>
+
+                        <div id="protocol-summary" class="protocol-summary"></div>
+
+                        <div class="protocol-options">
+                            <button class="protocol-button" data-choice="manual">
+                                <strong>LOCK SYSTEMS TO MANUAL RECOVERY BUS</strong><br><br>
+
+                                Keep ORCH-13 isolated and continue recovery through
+                                the independently verified MANUAL-BUS path.
+                            </button>
+
+                            <button class="protocol-button" data-choice="automation">
+                                <strong>RE-ENABLE AUTOMATED ORCHESTRATION</strong><br><br>
+
+                                Return recovery authority to ORCH-13 and allow it
+                                to complete all service startup operations.
+                            </button>
+
+                            <button class="protocol-button" data-choice="sacrifice">
+                                <strong>CONTROLLED BLACKOUT</strong><br><br>
+
+                                Preserve authentication, network core and physical
+                                security while intentionally leaving noncritical
+                                systems offline.
+                            </button>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+
+        <footer>
+            <span>NORTHSTAR SYSTEMS // EMERGENCY INFRASTRUCTURE</span>
+            <span id="footer-status">Blackout protocol active.</span>
+        </footer>
+    </section>
+
+    <section id="ending-screen" class="hidden">
+        <div class="ending">
+            <p class="label">SHIFT 4 COMPLETE</p>
+
+            <h1 id="ending-title"></h1>
+
+            <p id="ending-description"></p>
+
+            <div class="ending-stats">
+                <div>
+                    <span>INFRASTRUCTURE</span>
+                    <strong id="ending-infra"></strong>
+                </div>
+
+                <div>
+                    <span>SECURITY</span>
+                    <strong id="ending-security"></strong>
+                </div>
+
+                <div>
+                    <span>RESERVE</span>
+                    <strong id="ending-reserve"></strong>
+                </div>
+
+                <div>
+                    <span>EVIDENCE</span>
+                    <strong id="ending-evidence"></strong>
+                </div>
+            </div>
+
+            <button
+                class="primary-button"
+                onclick="window.location.href='index.html'"
+            >
+                RETURN TO CAMPAIGN
+            </button>
+        </div>
+    </section>
+
+    <script>
+        const previousEnding =
+            localStorage.getItem("aftershift_shift3_best") ||
+            "ENDING: DEAD CHANNEL";
+
+        document.getElementById("previous-result").textContent =
+            previousEnding.replace("ENDING: ", "");
+
+        const state = {
+            infrastructure: 48,
+            security: 92,
+            reserve: 18,
+            maxReserve: 22,
+            minutes: 4 * 60 + 6,
+            orchIsolated: false,
+            manualBus: false,
+            protocolUnlocked: false,
+            decision: null,
+            sabotageSeen: false
+        };
+
+        const foundEvidence = new Set();
+
+        const services = {
+            core: {
+                id: "CORE-SRV-01",
+                name: "Network Core",
+                description: "Primary routing and internal service backbone.",
+                status: "OFFLINE",
+                cost: 5,
+                gain: 18,
+                critical: true
+            },
+
+            auth: {
+                id: "AUTH-SVC",
+                name: "Authentication",
+                description: "Identity, directory and user authentication services.",
+                status: "DEGRADED",
+                cost: 4,
+                gain: 13,
+                critical: true
+            },
+
+            access: {
+                id: "ACCESS-CTRL",
+                name: "Physical Access",
+                description: "Badge readers and restricted-area access controls.",
+                status: "DEGRADED",
+                cost: 4,
+                gain: 11,
+                critical: true
+            },
+
+            voice: {
+                id: "VOICE-GW-01",
+                name: "Voice Gateway",
+                description: "Internal telephone and emergency voice communications.",
+                status: "OFFLINE",
+                cost: 3,
+                gain: 7,
+                critical: false
+            },
+
+            floor3: {
+                id: "FLOOR03-NET",
+                name: "Floor 03 Network",
+                description: "Local network segment serving third-floor operations.",
+                status: "LOST",
+                cost: 2,
+                gain: 6,
+                critical: false
+            }
+        };
+
+        const evidence = {
+            shutdownSequence: {
+                title: "Coordinated Service Shutdown",
+                description:
+                    "Five infrastructure services entered failure states within eleven seconds, inconsistent with a normal utility outage."
+            },
+
+            internalOrigin: {
+                title: "Internal Command Origin",
+                description:
+                    "Shutdown requests originated from ORCH-13 inside Northstar's own orchestration network."
+            },
+
+            privilegedToken: {
+                title: "Privileged Maintenance Token",
+                description:
+                    "ORCH-13 executed blackout policy using svc-orchestrator, a token with emergency infrastructure authority."
+            },
+
+            tamperedUps: {
+                title: "Tampered UPS Threshold",
+                description:
+                    "Backup controllers were modified to trigger aggressive service shutdown at 65% reserve instead of the approved 20% threshold."
+            },
+
+            recoverySabotage: {
+                title: "Recovery Sabotage",
+                description:
+                    "Automated recovery attempts were repeatedly reversed by ORCH-13 after services reported successful startup."
+            },
+
+            relayLegacy: {
+                title: "RELAY-09 Legacy Link",
+                description:
+                    "ORCH-13 inherited a routing trust relationship from RELAY-09, the compromised communications service isolated during Shift 3."
+            },
+
+            manualFailover: {
+                title: "Hidden Manual Failover",
+                description:
+                    "A dormant MANUAL-BUS route bypasses ORCH-13 and can distribute reserve power without automation approval."
+            },
+
+            blackoutPath: {
+                title: "Blackout Control Path",
+                description:
+                    "Evidence correlates the shutdown sequence, privileged token, altered UPS policy and RELAY-09 trust into one controlled infrastructure event."
+            }
+        };
+
+        const startButton = document.getElementById("start-button");
+        const startScreen = document.getElementById("start-screen");
+        const gameScreen = document.getElementById("game-screen");
+        const endingScreen = document.getElementById("ending-screen");
+        const terminalInput = document.getElementById("terminal-input");
+        const terminalOutput = document.getElementById("terminal-output");
+
+        startButton.addEventListener("click", startGame);
+
+        document.querySelectorAll(".nav").forEach(button => {
+            button.addEventListener("click", () => {
+                openView(button.dataset.view);
+
+                if (button.dataset.view === "terminal") {
+                    setTimeout(() => terminalInput.focus(), 100);
+                }
+            });
+        });
+
+        terminalInput.addEventListener("keydown", event => {
+            if (event.key === "Enter") {
+                const command = terminalInput.value.trim();
+
+                if (command) {
+                    runCommand(command);
+                }
+
+                terminalInput.value = "";
+            }
+        });
+
+        document.querySelectorAll(".quick-action").forEach(button => {
+            button.addEventListener("click", () => {
+                terminalInput.value = button.dataset.command;
+                terminalInput.focus();
+            });
+        });
+
+        document.querySelectorAll(".protocol-button").forEach(button => {
+            button.addEventListener("click", () => {
+                state.decision = button.dataset.choice;
+                finishShift();
+            });
+        });
+
+        function startGame() {
+            startScreen.classList.add("hidden");
+            gameScreen.classList.remove("hidden");
+
+            terminalLine("NORTHSTAR EMERGENCY SHELL", "green");
+            terminalLine("Blackout Protocol authority granted.", "blue");
+            terminalLine("");
+            terminalLine("External utility power: NORMAL", "green");
+            terminalLine("Internal infrastructure state: CRITICAL", "red");
+            terminalLine("Backup reserve: 18 minutes", "yellow");
+            terminalLine("");
+            terminalLine('Type "help" for emergency commands.');
+
+            renderServices();
+            renderRecovery();
+            renderEvidence();
+            updateStats();
+            updateClock();
+        }
+
+        function openView(name) {
+            document.querySelectorAll(".view").forEach(view => {
+                view.classList.add("hidden");
+            });
+
+            const target = document.getElementById(`${name}-view`);
+
+            if (target) {
+                target.classList.remove("hidden");
+            }
+
+            document.querySelectorAll(".nav").forEach(button => {
+                button.classList.toggle(
+                    "active",
+                    button.dataset.view === name
+                );
+            });
+        }
+
+        function renderServices() {
+            const container = document.getElementById("service-grid");
+            container.innerHTML = "";
+
+            Object.entries(services).forEach(([key, service]) => {
+                const card = document.createElement("div");
+
+                let className = "service";
+
+                if (service.status === "RESTORED") {
+                    className += " restored";
+                } else if (service.status === "UNSTABLE") {
+                    className += " unstable";
+                } else if (service.status === "DEGRADED") {
+                    className += " degraded";
+                }
+
+                card.className = className;
+
+                card.innerHTML = `
+                    <small>${service.id}</small>
+
+                    <h3>${service.name}</h3>
+
+                    <p>${service.description}</p>
+
+                    <span class="service-status">
+                        ${service.status}
+                    </span>
+                `;
+
+                container.appendChild(card);
+            });
+        }
+
+        function renderRecovery() {
+            const container = document.getElementById("recovery-list");
+            container.innerHTML = "";
+
+            Object.entries(services).forEach(([key, service]) => {
+                const item = document.createElement("div");
+                item.className = "recovery-item";
+
+                let buttonText =
+                    `RESTORE // ${service.cost}m`;
+
+                let disabled = false;
+
+                if (service.status === "RESTORED") {
+                    buttonText = "RESTORED";
+                    disabled = true;
+                }
+
+                if (service.status === "UNSTABLE") {
+                    buttonText = "STABILIZE // 1m";
+                }
+
+                item.innerHTML = `
+                    <div>
+                        <strong>
+                            ${service.id} // ${service.name}
+                        </strong>
+
+                        <span>
+                            STATUS: ${service.status}<br>
+                            PRIORITY: ${service.critical ? "CRITICAL" : "SECONDARY"}
+                        </span>
+                    </div>
+
+                    <button
+                        class="restore-button"
+                        data-service="${key}"
+                        ${disabled ? "disabled" : ""}
+                    >
+                        ${buttonText}
+                    </button>
+                `;
+
+                container.appendChild(item);
+            });
+
+            container
+                .querySelectorAll(".restore-button")
+                .forEach(button => {
+                    button.addEventListener("click", () => {
+                        restoreService(button.dataset.service);
+                    });
+                });
+        }
+
+        function restoreService(key) {
+            const service = services[key];
+
+            if (!service) return;
+
+            if (service.status === "RESTORED") {
+                return;
+            }
+
+            if (service.status === "UNSTABLE") {
+                if (state.reserve < 1) {
+                    showFooter("Insufficient reserve to stabilize service.");
+                    return;
+                }
+
+                consumeReserve(1);
+
+                service.status = "RESTORED";
+
+                state.infrastructure =
+                    clamp(state.infrastructure + service.gain);
+
+                terminalLine(
+                    `${service.id} stabilized through isolated recovery path.`,
+                    "green"
+                );
+
+                renderServices();
+                renderRecovery();
+                updateStats();
+                checkProtocol();
+                return;
+            }
+
+            if (state.reserve < service.cost) {
+                showFooter(
+                    `Insufficient backup reserve for ${service.id}.`
+                );
+                return;
+            }
+
+            consumeReserve(service.cost);
+
+            if (!state.orchIsolated && !state.sabotageSeen) {
+                state.sabotageSeen = true;
+
+                service.status = "UNSTABLE";
+
+                state.infrastructure =
+                    clamp(state.infrastructure + 4);
+
+                state.security =
+                    clamp(state.security - 5);
+
+                terminalLine(
+                    `${service.id} startup completed.`,
+                    "green"
+                );
+
+                terminalLine(
+                    `WARNING: ORCH-13 immediately reversed recovery policy.`,
+                    "red"
+                );
+
+                terminalLine(
+                    `${service.id} is now UNSTABLE.`,
+                    "yellow"
+                );
+
+                discover("recoverySabotage");
+
+                renderServices();
+                renderRecovery();
+                updateStats();
+                checkProtocol();
+                return;
+            }
+
+            service.status = "RESTORED";
+
+            state.infrastructure =
+                clamp(state.infrastructure + service.gain);
+
+            terminalLine(
+                `${service.id} restored successfully.`,
+                "green"
+            );
+
+            renderServices();
+            renderRecovery();
+            updateStats();
+            checkProtocol();
+        }
+
+        function consumeReserve(amount) {
+            state.reserve =
+                Math.max(0, state.reserve - amount);
+
+            state.minutes += amount;
+
+            updateClock();
+            updateStats();
+
+            if (state.reserve <= 4) {
+                document.getElementById("footer-status").textContent =
+                    "WARNING: Emergency reserve critically low.";
+            }
+
+            checkProtocol();
+        }
+
+        function discover(key) {
+            if (!evidence[key] || foundEvidence.has(key)) {
+                return;
+            }
+
+            foundEvidence.add(key);
+
+            terminalLine(
+                `[EVIDENCE ADDED] ${evidence[key].title}`,
+                "green"
+            );
+
+            document.getElementById("footer-status").textContent =
+                `New evidence: ${evidence[key].title}`;
+
+            checkCorrelation();
+            renderEvidence();
+            updateStats();
+            checkProtocol();
+        }
+
+        function checkCorrelation() {
+            const required = [
+                "shutdownSequence",
+                "internalOrigin",
+                "privilegedToken",
+                "tamperedUps",
+                "recoverySabotage",
+                "relayLegacy",
+                "manualFailover"
+            ];
+
+            if (
+                required.every(key => foundEvidence.has(key)) &&
+                !foundEvidence.has("blackoutPath")
+            ) {
+                foundEvidence.add("blackoutPath");
+
+                terminalLine(
+                    "[CORRELATION COMPLETE] Blackout Control Path reconstructed.",
+                    "green"
+                );
+
+                terminalLine(
+                    "Shutdown -> ORCH-13 -> svc-orchestrator -> modified UPS policy -> RELAY-09 trust",
+                    "yellow"
+                );
+
+                renderEvidence();
+                updateStats();
+                checkProtocol();
+            }
+        }
+
+        function renderEvidence() {
+            const container =
+                document.getElementById("evidence-grid");
+
+            container.innerHTML = "";
+
+            Object.entries(evidence).forEach(([key, item], index) => {
+                const found = foundEvidence.has(key);
+
+                const card = document.createElement("div");
+
+                card.className =
+                    `evidence ${found ? "found" : "locked"}`;
+
+                card.innerHTML = `
+                    <span>
+                        ${found ? "DISCOVERED" : "UNDISCOVERED"}
+                    </span>
+
+                    <h3>
+                        ${
+                            found
+                                ? item.title
+                                : `Evidence ${String(index + 1).padStart(2, "0")}`
+                        }
+                    </h3>
+
+                    <p>
+                        ${
+                            found
+                                ? item.description
+                                : "Further infrastructure investigation required."
+                        }
+                    </p>
+                `;
+
+                container.appendChild(card);
+            });
+
+            document.getElementById("evidence-count").textContent =
+                foundEvidence.size;
+
+            document.getElementById("evidence-stat").textContent =
+                `${foundEvidence.size} / 8`;
+
+            document.getElementById("case-progress").textContent =
+                `${foundEvidence.size} / 8`;
+        }
+
+        function runCommand(raw) {
+            terminalLine(`aftershift> ${raw}`, "command");
+
+            const input = raw.trim();
+            const lower = input.toLowerCase();
+            const parts = input.split(/\s+/);
+
+            const command = parts[0].toLowerCase();
+            const argument =
+                parts.slice(1).join(" ");
+
+            state.minutes += 1;
+            updateClock();
+
+            if (lower === "help") {
+                showHelp();
+                return;
+            }
+
+            if (lower === "status") {
+                showStatus();
+                return;
+            }
+
+            if (lower === "evidence") {
+                showEvidence();
+                return;
+            }
+
+            if (lower === "clear") {
+                terminalOutput.innerHTML = "";
+                return;
+            }
+
+            if (lower === "grid status") {
+                gridStatus();
+                return;
+            }
+
+            if (lower === "logs power") {
+                powerLogs();
+                return;
+            }
+
+            if (lower === "logs recovery") {
+                recoveryLogs();
+                return;
+            }
+
+            if (command === "inspect") {
+                inspectCommand(argument);
+                return;
+            }
+
+            if (command === "token") {
+                tokenCommand(argument);
+                return;
+            }
+
+            if (command === "ups") {
+                upsCommand(argument);
+                return;
+            }
+
+            if (command === "trace") {
+                traceCommand(argument);
+                return;
+            }
+
+            if (command === "failover") {
+                failoverCommand(argument);
+                return;
+            }
+
+            if (command === "isolate") {
+                isolateCommand(argument);
+                return;
+            }
+
+            terminalLine(
+                "Unknown emergency command. Type help.",
+                "red"
+            );
+        }
+
+        function showHelp() {
+            terminalLine(
+                "BLACKOUT PROTOCOL COMMANDS",
+                "green"
+            );
+
+            terminalLine("");
+            terminalLine("grid status");
+            terminalLine("inspect ORCH-13");
+            terminalLine("logs power");
+            terminalLine("logs recovery");
+            terminalLine("token svc-orchestrator");
+            terminalLine("ups audit");
+            terminalLine("trace ORCH-13");
+            terminalLine("failover MANUAL-BUS");
+            terminalLine("isolate ORCH-13");
+            terminalLine("evidence");
+            terminalLine("status");
+            terminalLine("clear");
+        }
+
+        function showStatus() {
+            terminalLine(
+                "BLACKOUT STATUS",
+                "blue"
+            );
+
+            terminalLine(
+                `Infrastructure: ${state.infrastructure}%`
+            );
+
+            terminalLine(
+                `Security: ${state.security}%`
+            );
+
+            terminalLine(
+                `Backup Reserve: ${state.reserve} minutes`
+            );
+
+            terminalLine(
+                `Evidence: ${foundEvidence.size}/8`
+            );
+
+            terminalLine(
+                `ORCH-13: ${state.orchIsolated ? "ISOLATED" : "ACTIVE"}`,
+                state.orchIsolated ? "green" : "red"
+            );
+
+            terminalLine(
+                `MANUAL-BUS: ${state.manualBus ? "ONLINE" : "OFFLINE"}`,
+                state.manualBus ? "green" : "yellow"
+            );
+        }
+
+        function showEvidence() {
+            terminalLine(
+                "DISCOVERED BLACKOUT EVIDENCE",
+                "blue"
+            );
+
+            if (!foundEvidence.size) {
+                terminalLine(
+                    "No evidence discovered.",
+                    "yellow"
+                );
+
+                return;
+            }
+
+            foundEvidence.forEach(key => {
+                terminalLine(
+                    `- ${evidence[key].title}`
+                );
+            });
+        }
+
+        function gridStatus() {
+            terminalLine(
+                "INFRASTRUCTURE EVENT CORRELATION",
+                "blue"
+            );
+
+            terminalLine(
+                "04:06:02 CORE-SRV-01 -> OFFLINE"
+            );
+
+            terminalLine(
+                "04:06:04 AUTH-SVC -> DEGRADED"
+            );
+
+            terminalLine(
+                "04:06:07 ACCESS-CTRL -> DEGRADED"
+            );
+
+            terminalLine(
+                "04:06:09 VOICE-GW-01 -> OFFLINE"
+            );
+
+            terminalLine(
+                "04:06:11 FLOOR03-NET -> LOST"
+            );
+
+            terminalLine("");
+            terminalLine(
+                "Failure window: 11 seconds",
+                "red"
+            );
+
+            discover("shutdownSequence");
+        }
+
+        function inspectCommand(argument) {
+            if (argument.toUpperCase() !== "ORCH-13") {
+                terminalLine(
+                    "Usage: inspect ORCH-13",
+                    "yellow"
+                );
+
+                return;
+            }
+
+            terminalLine(
+                "ORCHESTRATION SERVICE",
+                "blue"
+            );
+
+            terminalLine("Service: ORCH-13");
+            terminalLine("State: ACTIVE", "red");
+            terminalLine(
+                "Authority: EMERGENCY INFRASTRUCTURE"
+            );
+
+            terminalLine(
+                "Shutdown Policy Executed: 04:06:02",
+                "red"
+            );
+
+            terminalLine(
+                "External Command Source: NONE"
+            );
+
+            terminalLine(
+                "Origin: INTERNAL",
+                "red"
+            );
+
+            discover("internalOrigin");
+        }
+
+        function powerLogs() {
+            terminalLine(
+                "BACKUP POWER CONTROLLER",
+                "blue"
+            );
+
+            terminalLine(
+                "Approved shutdown threshold: 20%"
+            );
+
+            terminalLine(
+                "Current shutdown threshold: 65%",
+                "red"
+            );
+
+            terminalLine(
+                "Modified: 03:58 AM"
+            );
+
+            terminalLine(
+                "Source: ORCH-13",
+                "yellow"
+            );
+
+            discover("tamperedUps");
+        }
+
+        function recoveryLogs() {
+            terminalLine(
+                "RECOVERY EVENT HISTORY",
+                "blue"
+            );
+
+            terminalLine(
+                "04:01 AUTH-SVC startup -> SUCCESS"
+            );
+
+            terminalLine(
+                "04:01 ORCH-13 -> APPLY SHUTDOWN POLICY",
+                "red"
+            );
+
+            terminalLine(
+                "04:02 ACCESS-CTRL startup -> SUCCESS"
+            );
+
+            terminalLine(
+                "04:02 ORCH-13 -> APPLY CONSERVATION POLICY",
+                "red"
+            );
+
+            terminalLine(
+                "Recovery reversals detected.",
+                "yellow"
+            );
+
+            discover("recoverySabotage");
+        }
+
+        function tokenCommand(argument) {
+            if (
+                argument.toLowerCase() !==
+                "svc-orchestrator"
+            ) {
+                terminalLine(
+                    "Usage: token svc-orchestrator",
+                    "yellow"
+                );
+
+                return;
+            }
+
+            terminalLine(
+                "SERVICE TOKEN TRACE",
+                "blue"
+            );
+
+            terminalLine(
+                "Token: svc-orchestrator"
+            );
+
+            terminalLine(
+                "Privilege: INFRASTRUCTURE ADMIN",
+                "red"
+            );
+
+            terminalLine(
+                "Interactive Owner: NONE"
+            );
+
+            terminalLine(
+                "Last Used: ORCH-13 // 04:06 AM"
+            );
+
+            terminalLine(
+                "Emergency Approval: NOT FOUND",
+                "red"
+            );
+
+            discover("privilegedToken");
+        }
+
+        function upsCommand(argument) {
+            if (argument.toLowerCase() !== "audit") {
+                terminalLine(
+                    "Usage: ups audit",
+                    "yellow"
+                );
+
+                return;
+            }
+
+            powerLogs();
+        }
+
+        function traceCommand(argument) {
+            if (argument.toUpperCase() !== "ORCH-13") {
+                terminalLine(
+                    "Usage: trace ORCH-13",
+                    "yellow"
+                );
+
+                return;
+            }
+
+            terminalLine(
+                "TRUST PATH TRACE",
+                "blue"
+            );
+
+            terminalLine(
+                "ORCH-13 -> INFRA-CTRL"
+            );
+
+            terminalLine(
+                "ORCH-13 -> AUTH-SVC"
+            );
+
+            terminalLine(
+                "ORCH-13 -> RELAY-09 [LEGACY TRUST]",
+                "red"
+            );
+
+            terminalLine(
+                "RELAY-09 status: ISOLATED DURING SHIFT 3"
+            );
+
+            terminalLine(
+                "Legacy trust relationship remained active.",
+                "yellow"
+            );
+
+            discover("relayLegacy");
+        }
+
+        function failoverCommand(argument) {
+            if (argument.toUpperCase() !== "MANUAL-BUS") {
+                terminalLine(
+                    "Usage: failover MANUAL-BUS",
+                    "yellow"
+                );
+
+                return;
+            }
+
+            if (state.manualBus) {
+                terminalLine(
+                    "MANUAL-BUS already active.",
+                    "yellow"
+                );
+
+                return;
+            }
+
+            state.manualBus = true;
+
+            state.reserve =
+                Math.min(
+                    state.maxReserve,
+                    state.reserve + 4
+                );
+
+            terminalLine(
+                "MANUAL FAILOVER BUS",
+                "blue"
+            );
+
+            terminalLine(
+                "ORCH-13 authorization bypassed."
+            );
+
+            terminalLine(
+                "Independent reserve path: ONLINE",
+                "green"
+            );
+
+            terminalLine(
+                "Recovered usable reserve: +4 minutes",
+                "green"
+            );
+
+            discover("manualFailover");
+            updateStats();
+            checkProtocol();
+        }
+
+        function isolateCommand(argument) {
+            if (argument.toUpperCase() !== "ORCH-13") {
+                terminalLine(
+                    "Usage: isolate ORCH-13",
+                    "yellow"
+                );
+
+                return;
+            }
+
+            if (state.orchIsolated) {
+                terminalLine(
+                    "ORCH-13 already isolated.",
+                    "yellow"
+                );
+
+                return;
+            }
+
+            state.orchIsolated = true;
+
+            state.security =
+                clamp(state.security + 8);
+
+            terminalLine(
+                "EMERGENCY CONTROL",
+                "blue"
+            );
+
+            terminalLine(
+                "ORCH-13 -> ISOLATED",
+                "green"
+            );
+
+            terminalLine(
+                "Automatic shutdown authority revoked."
+            );
+
+            terminalLine(
+                "Service recovery sabotage stopped.",
+                "green"
+            );
+
+            document.getElementById(
+                "automation-state"
+            ).textContent = "ISOLATED";
+
+            document.getElementById(
+                "automation-state"
+            ).style.color = "var(--green)";
+
+            document.getElementById(
+                "automation-state"
+            ).style.borderColor = "var(--green)";
+
+            updateStats();
+            checkProtocol();
+        }
+
+        function updateStats() {
+            document.getElementById(
+                "infra-value"
+            ).textContent =
+                `${state.infrastructure}%`;
+
+            document.getElementById(
+                "security-value"
+            ).textContent =
+                `${state.security}%`;
+
+            document.getElementById(
+                "reserve-value"
+            ).textContent =
+                `${state.reserve}m`;
+
+            document.getElementById(
+                "reserve-header"
+            ).textContent =
+                `BACKUP // ${state.reserve} MIN`;
+
+            document.getElementById(
+                "infra-bar"
+            ).style.width =
+                `${state.infrastructure}%`;
+
+            document.getElementById(
+                "security-bar"
+            ).style.width =
+                `${state.security}%`;
+
+            document.getElementById(
+                "reserve-bar"
+            ).style.width =
+                `${Math.min(
+                    100,
+                    (state.reserve / state.maxReserve) * 100
+                )}%`;
+
+            setBar(
+                "infra-bar",
+                state.infrastructure
+            );
+
+            setBar(
+                "security-bar",
+                state.security
+            );
+
+            if (state.reserve >= 10) {
+                document.getElementById(
+                    "reserve-bar"
+                ).style.background =
+                    "var(--green)";
+            } else if (state.reserve >= 5) {
+                document.getElementById(
+                    "reserve-bar"
+                ).style.background =
+                    "var(--yellow)";
+            } else {
+                document.getElementById(
+                    "reserve-bar"
+                ).style.background =
+                    "var(--red)";
+            }
+
+            document.getElementById(
+                "evidence-stat"
+            ).textContent =
+                `${foundEvidence.size} / 8`;
+        }
+
+        function setBar(id, value) {
+            const bar =
+                document.getElementById(id);
+
+            if (value >= 70) {
+                bar.style.background =
+                    "var(--green)";
+            } else if (value >= 40) {
+                bar.style.background =
+                    "var(--yellow)";
+            } else {
+                bar.style.background =
+                    "var(--red)";
+            }
+        }
+
+        function checkProtocol() {
+            const criticalRestored =
+                services.core.status === "RESTORED" &&
+                services.auth.status === "RESTORED" &&
+                services.access.status === "RESTORED";
+
+            if (
+                state.protocolUnlocked ||
+                criticalRestored ||
+                foundEvidence.size >= 6 ||
+                state.reserve <= 4
+            ) {
+                state.protocolUnlocked = true;
+
+                document.getElementById(
+                    "protocol-nav"
+                ).classList.remove("hidden");
+
+                updateProtocolSummary();
+            }
+        }
+
+        function updateProtocolSummary() {
+            const restored =
+                Object.values(services)
+                    .filter(
+                        service =>
+                            service.status === "RESTORED"
+                    )
+                    .length;
+
+            const critical =
+                [
+                    services.core,
+                    services.auth,
+                    services.access
+                ].filter(
+                    service =>
+                        service.status === "RESTORED"
+                ).length;
+
+            document.getElementById(
+                "protocol-summary"
+            ).innerHTML = `
+                Evidence: ${foundEvidence.size} / 8<br>
+                Services Restored: ${restored} / 5<br>
+                Critical Services Restored: ${critical} / 3<br>
+                ORCH-13: ${
+                    state.orchIsolated
+                        ? "ISOLATED"
+                        : "ACTIVE"
+                }<br>
+                MANUAL-BUS: ${
+                    state.manualBus
+                        ? "ONLINE"
+                        : "OFFLINE"
+                }<br>
+                Backup Reserve: ${state.reserve} minutes
+            `;
+        }
+
+        function updateClock() {
+            state.minutes %= 1440;
+
+            const hours =
+                Math.floor(
+                    state.minutes / 60
+                );
+
+            const minutes =
+                state.minutes % 60;
+
+            const period =
+                hours >= 12 ? "PM" : "AM";
+
+            let displayHour =
+                hours % 12;
+
+            if (displayHour === 0) {
+                displayHour = 12;
+            }
+
+            document.getElementById(
+                "clock"
+            ).textContent =
+                `${displayHour}:${String(minutes).padStart(2, "0")} ${period}`;
+        }
+
+        function showFooter(message) {
+            document.getElementById(
+                "footer-status"
+            ).textContent = message;
+        }
+
+        function terminalLine(text, type = "") {
+            const line =
+                document.createElement("div");
+
+            line.className =
+                `terminal-line ${type}`;
+
+            line.textContent = text;
+
+            terminalOutput.appendChild(line);
+
+            terminalOutput.scrollTop =
+                terminalOutput.scrollHeight;
+        }
+
+        function finishShift() {
+            gameScreen.classList.add("hidden");
+            endingScreen.classList.remove("hidden");
+
+            const evidenceCount =
+                foundEvidence.size;
+
+            const criticalRestored =
+                services.core.status === "RESTORED" &&
+                services.auth.status === "RESTORED" &&
+                services.access.status === "RESTORED";
+
+            let title;
+            let description;
+
+            if (
+                evidenceCount === 8 &&
+                state.orchIsolated &&
+                state.manualBus &&
+                criticalRestored &&
+                state.decision === "manual" &&
+                state.security >= 70 &&
+                state.reserve > 0
+            ) {
+                title =
+                    "ENDING: LIGHTS ON";
+
+                description =
+                    "You refused to let the same compromised automation that caused the blackout control the recovery. ORCH-13 was isolated, the hidden MANUAL-BUS restored independent power distribution, and Northstar's critical services returned without surrendering infrastructure authority. One final controller reference remains in the preserved ORCH-13 policy cache: NIGHTWATCH // NW-ROOT.";
+            } else if (
+                state.decision === "automation"
+            ) {
+                title =
+                    "ENDING: AUTOMATED FAILURE";
+
+                description =
+                    "ORCH-13 regained emergency authority. For seventeen seconds every service reported healthy. Then the same shutdown policy executed again. By sunrise, Northstar's infrastructure was dark and the orchestration logs had been erased.";
+            } else if (
+                state.decision === "sacrifice" &&
+                state.orchIsolated &&
+                criticalRestored
+            ) {
+                title =
+                    "ENDING: CONTROLLED BLACKOUT";
+
+                description =
+                    "You accepted that not every system could be saved. Core networking, authentication and physical security survived while secondary services remained offline. Northstar stayed operational, but the blackout's full control path was never completely neutralized.";
+            } else if (
+                state.decision === "manual" &&
+                state.orchIsolated &&
+                criticalRestored
+            ) {
+                title =
+                    "ENDING: MANUAL SURVIVAL";
+
+                description =
+                    "Critical systems survived under manual control. ORCH-13 remained isolated and the immediate crisis ended, but missing evidence leaves unanswered questions about who originally created the blackout policy.";
+            } else if (
+                state.reserve <= 0 ||
+                !criticalRestored
+            ) {
+                title =
+                    "ENDING: DARK FLOOR";
+
+                description =
+                    "Backup reserve expired before Northstar's critical infrastructure could be stabilized. Emergency lighting remained online, but authentication and internal networking failed across the building.";
+            } else {
+                title =
+                    "ENDING: PARTIAL RESTORE";
+
+                description =
+                    "Several systems returned, but Northstar never regained a fully trusted infrastructure state. The blackout ended without a complete explanation of the internal automation responsible.";
+            }
+
+            localStorage.setItem(
+                "aftershift_shift4_last",
+                title
+            );
+
+            document.getElementById(
+                "ending-title"
+            ).textContent = title;
+
+            document.getElementById(
+                "ending-description"
+            ).textContent = description;
+
+            document.getElementById(
+                "ending-infra"
+            ).textContent =
+                `${state.infrastructure}%`;
+
+            document.getElementById(
+                "ending-security"
+            ).textContent =
+                `${state.security}%`;
+
+            document.getElementById(
+                "ending-reserve"
+            ).textContent =
+                `${state.reserve}m`;
+
+            document.getElementById(
+                "ending-evidence"
+            ).textContent =
+                `${evidenceCount} / 8`;
+        }
+
+        function clamp(value) {
+            return Math.max(
+                0,
+                Math.min(100, value)
+            );
+        }
+    </script>
+
+    <script src="progress.js"></script>
+</body>
+</html>

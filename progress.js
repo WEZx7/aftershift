@@ -23,6 +23,15 @@ const AftershiftProgress = (() => {
             "ENDING: SILENCE": 4,
             "ENDING: NO SIGNAL": 2,
             "ENDING: FALSE DIRECTIVE": 1
+        },
+
+        4: {
+            "ENDING: LIGHTS ON": 6,
+            "ENDING: CONTROLLED BLACKOUT": 5,
+            "ENDING: MANUAL SURVIVAL": 4,
+            "ENDING: PARTIAL RESTORE": 3,
+            "ENDING: DARK FLOOR": 2,
+            "ENDING: AUTOMATED FAILURE": 1
         }
     };
 
@@ -32,6 +41,7 @@ const AftershiftProgress = (() => {
         if (path.includes("shift1.html")) return 1;
         if (path.includes("shift2.html")) return 2;
         if (path.includes("shift3.html")) return 3;
+        if (path.includes("shift4.html")) return 4;
 
         return null;
     }
